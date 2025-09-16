@@ -4,7 +4,8 @@ if [ -z "$ANDROID_NDK_HOME" -a "$ANDROID_NDK_HOME" == "" ]; then
 fi
 
 export PATH=$ANDROID_NDK_HOME:$PATH
-_NDK_OPTS="-j `nproc` NDK_MODULE_PATH=$DIR"
+export NDK_MODULE_PATH=$(pwd)
+echo $NDK_MODULE_PATH
 
 echo "Building boost..."
 sh build_boost.sh 
@@ -19,4 +20,4 @@ echo "Cleaning..."
 $ANDROID_NDK_HOME/ndk-build clean
 
 echo "Building i2pd"
-$ANDROID_NDK_HOME/ndk-build
+$ANDROID_NDK_HOME/ndk-build 
