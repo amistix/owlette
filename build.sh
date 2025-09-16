@@ -20,3 +20,7 @@ $ANDROID_NDK_HOME/ndk-build \
   APP_ABI=arm64-v8a \
   NDK_OUT=$NDK_OUT \
   NDK_LIBS_OUT=$NDK_LIBS_OUT
+
+cd binary/jni
+
+sh build.sh
