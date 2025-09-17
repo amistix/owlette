@@ -21,7 +21,7 @@ public class MainActivity extends Activity {
     private static MainActivity instance;
 
     static {
-        System.loadLibrary("native-lib");
+        System.loadLibrary("i2pd");
     }
 
     public native String stringFromJNI();

@@ -4,7 +4,6 @@ if [ -z "$ANDROID_NDK_HOME" -a "$ANDROID_NDK_HOME" == "" ]; then
 fi
 
 export PATH=$ANDROID_NDK_HOME:$PATH
-export NDK_MODULE_PATH=$(pwd)
 echo $NDK_MODULE_PATH
 
 echo "Building boost..."
