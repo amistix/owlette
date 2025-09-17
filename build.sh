@@ -1,10 +1,6 @@
 #!/bin/bash
 set -e
 
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
-export ANDROID_HOME=~/android-sdk
-export ANDROID_NDK_HOME=~/android-sdk/ndk/23.2.8568313
-
 JNI_PATH=app/src/main/jni
 APP_PLATFORM=android-21
 
