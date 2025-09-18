@@ -8,6 +8,8 @@ mkdir -p app/build/ndk
 NDK_OUT=app/build/ndk/obj
 NDK_LIBS_OUT=app/build/ndk/libs
 
+export NDK_MODULE_PATH=$(pwd)/binary/jni
+
 cd binary/jni
 sh build.sh
 cd ..

@@ -20,12 +20,6 @@ public class MainActivity extends Activity {
     private RecyclerViewAdapter adapter;
     private static MainActivity instance;
 
-    static {
-        System.loadLibrary("i2pd");
-    }
-
-    public native String stringFromJNI();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,7 +29,7 @@ public class MainActivity extends Activity {
         binding = ActivityChannelBinding.inflate(getLayoutInflater());
 
         setContentView(binding.getRoot());
-        binding.label.setText(stringFromJNI());
+        binding.label.setText("@anon");
 
 
         RecyclerView recyclerView = binding.recyclerGchat;

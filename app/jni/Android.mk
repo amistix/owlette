@@ -11,6 +11,7 @@ LOCAL_STATIC_LIBRARIES := \
 	miniupnpc
 LOCAL_LDLIBS := -lz
 LOCAL_SRC_FILES := \
+	DaemonAndroid.cpp \
 	i2pd_android.cpp \
 	$(IFADDRS_PATH)/ifaddrs.cpp \
 	$(IFADDRS_PATH)/bionic_netlink.cpp \
