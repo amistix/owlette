@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.view.View;
 import android.widget.EditText;
+import java.io.IOException;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,6 +20,7 @@ public class MainActivity extends Activity {
     private ActivityChannelBinding binding;
     private RecyclerViewAdapter adapter;
     private static MainActivity instance;
+    private SimpleHttpServer server;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +31,7 @@ public class MainActivity extends Activity {
         binding = ActivityChannelBinding.inflate(getLayoutInflater());
 
         setContentView(binding.getRoot());
-        binding.label.setText("@anon");
+        binding.label.setText("@anon again");
 
 
         RecyclerView recyclerView = binding.recyclerGchat;
@@ -50,7 +52,24 @@ public class MainActivity extends Activity {
                 editMessage.getText().clear();
             }
         });
-
-
+        try {
+            server = new SimpleHttpServer(8080);
+            server.setOnMessageReceivedListener((message) -> {
+                if (message.isEmpty()) return;
+                runOnUiThread(() -> {
+                    adapter.addItem(message);
+                    recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                });
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (server != null) {
+            server.stop();
+        }
     }
 }
