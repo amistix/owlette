@@ -9,6 +9,9 @@ import android.widget.EditText;
 import java.io.IOException;
 import android.os.AsyncTask;
 
+import java.io.*;
+import java.net.*;
+import java.util.concurrent.*;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,7 +25,7 @@ public class MainActivity extends Activity {
     private ActivityChannelBinding binding;
     private RecyclerViewAdapter adapter;
     private static MainActivity instance;
-    private SimpleHttpServer server;
+    private TcpClient tcpClient;
 
     private String connectedDeviceIp;
 
@@ -35,7 +38,7 @@ public class MainActivity extends Activity {
         binding = ActivityChannelBinding.inflate(getLayoutInflater());
 
         setContentView(binding.getRoot());
-        binding.label.setText("@anon again");
+        binding.label.setText("@anon");
 
 
         RecyclerView recyclerView = binding.recyclerGchat;
@@ -45,6 +48,8 @@ public class MainActivity extends Activity {
 
         Button buttonSend = binding.buttonSend;
         EditText editMessage = binding.editMessage;
+
+        tcpClient = new TcpClient();
 
         buttonSend.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,52 +61,54 @@ public class MainActivity extends Activity {
                 String[] words = message.split("\\s+");
                 if ("/connect".equals(words[0])){
                     connectedDeviceIp = words[1];
-                    adapter.addItem("Device " + connectedDeviceIp + " was connected!");
+                    adapter.addItem("Device " + connectedDeviceIp + " was added!");
+                    tcpClient.startClient(connectedDeviceIp, 8080, 10000, new TcpClient.MessageHandler() {
+                        @Override
+                        public void onMessage(String msg, InetAddress addr, int port) {
+                            return;
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            adapter.addItem("[CLIENT ERROR] " + e.getMessage());
+                        }
+                    });
                     return;
                 }
-
                 new AsyncTask<Void, Void, String>() {
                     @Override
                     protected String doInBackground(Void... params) {
-                        try {
-                            if (connectedDeviceIp != null) {
-                                SimpleHttpClient.sendPost("http://" + connectedDeviceIp + ":8080", message);
-                                return message;
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            return e.getMessage();
-                        }
-                        return "No connection established.";
+                        tcpClient.sendFromClient(message);
+                        return message;
                     }
-
                     @Override
                     protected void onPostExecute(String result) {
                         adapter.addItem(result);
                         recyclerView.scrollToPosition(adapter.getItemCount() - 1);
                     }
                 }.execute();
+                
             }
         });
 
-        try {
-            server = new SimpleHttpServer(8080);
-            server.setOnMessageReceivedListener((message) -> {
+        tcpClient.startServer(8080, new TcpClient.MessageHandler() {
+            @Override
+            public void onMessage(String message, InetAddress addr, int port) {
                 if (message.isEmpty()) return;
                 runOnUiThread(() -> {
                     adapter.addItem(message);
                     recyclerView.scrollToPosition(adapter.getItemCount() - 1);
                 });
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                adapter.addItem("[SERVER ERROR] " + e.getMessage());
+            }
+        });
     }
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (server != null) {
-            server.stop();
-        }
     }
 }
