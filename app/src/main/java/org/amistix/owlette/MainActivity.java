@@ -7,6 +7,8 @@ import android.widget.Button;
 import android.view.View;
 import android.widget.EditText;
 import java.io.IOException;
+import android.os.AsyncTask;
+
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,6 +23,8 @@ public class MainActivity extends Activity {
     private RecyclerViewAdapter adapter;
     private static MainActivity instance;
     private SimpleHttpServer server;
+
+    private String connectedDeviceIp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +50,40 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 String message = editMessage.getText().toString();
+                editMessage.getText().clear();
                 if (message.isEmpty()) return;
 
-                adapter.addItem(message);
-                editMessage.getText().clear();
+                String[] words = message.split("\\s+");
+                if ("/connect".equals(words[0])){
+                    connectedDeviceIp = words[1];
+                    adapter.addItem("Device " + connectedDeviceIp + " was connected!");
+                    return;
+                }
+
+                new AsyncTask<Void, Void, String>() {
+                    @Override
+                    protected String doInBackground(Void... params) {
+                        try {
+                            if (connectedDeviceIp != null) {
+                                SimpleHttpClient.sendPost("http://" + connectedDeviceIp + ":8080", message);
+                                return message;
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return e.getMessage();
+                        }
+                        return "No connection established.";
+                    }
+
+                    @Override
+                    protected void onPostExecute(String result) {
+                        adapter.addItem(result);
+                        recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                    }
+                }.execute();
             }
         });
+
         try {
             server = new SimpleHttpServer(8080);
             server.setOnMessageReceivedListener((message) -> {
