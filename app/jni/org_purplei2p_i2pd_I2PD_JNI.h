@@ -16,55 +16,55 @@
 extern "C" {
 #endif
 
-JNIEXPORT jstring JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_getABICompiledWith
+JNIEXPORT jstring JNICALL Java_org_amistix_owlette_I2PD_1JNI_getABICompiledWith
 	(JNIEnv *, jclass);
 
-JNIEXPORT jstring JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_startDaemon
+JNIEXPORT jstring JNICALL Java_org_amistix_owlette_I2PD_1JNI_startDaemon
 	(JNIEnv *, jclass);
 
-JNIEXPORT void JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_stopDaemon
+JNIEXPORT void JNICALL Java_org_amistix_owlette_I2PD_1JNI_stopDaemon
 	(JNIEnv *, jclass);
 
-JNIEXPORT void JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_startAcceptingTunnels
+JNIEXPORT void JNICALL Java_org_amistix_owlette_I2PD_1JNI_startAcceptingTunnels
 	(JNIEnv *, jclass);
 
-JNIEXPORT void JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_stopAcceptingTunnels
+JNIEXPORT void JNICALL Java_org_amistix_owlette_I2PD_1JNI_stopAcceptingTunnels
 	(JNIEnv *, jclass);
 
-JNIEXPORT void JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_reloadTunnelsConfigs
+JNIEXPORT void JNICALL Java_org_amistix_owlette_I2PD_1JNI_reloadTunnelsConfigs
 	(JNIEnv *, jclass);
 
-JNIEXPORT void JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_setDataDir
+JNIEXPORT void JNICALL Java_org_amistix_owlette_I2PD_1JNI_setDataDir
 	(JNIEnv *env, jclass clazz, jstring jdataDir);
 
-JNIEXPORT void JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_setLanguage
+JNIEXPORT void JNICALL Java_org_amistix_owlette_I2PD_1JNI_setLanguage
 	(JNIEnv *env, jclass clazz, jstring jlanguage);
 
-JNIEXPORT jint JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_getTransitTunnelsCount
+JNIEXPORT jint JNICALL Java_org_amistix_owlette_I2PD_1JNI_getTransitTunnelsCount
 	(JNIEnv *, jclass);
 
-JNIEXPORT jstring JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_getWebConsAddr
+JNIEXPORT jstring JNICALL Java_org_amistix_owlette_I2PD_1JNI_getWebConsAddr
 	(JNIEnv *, jclass);
 
-JNIEXPORT jstring JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_getDataDir
+JNIEXPORT jstring JNICALL Java_org_amistix_owlette_I2PD_1JNI_getDataDir
 	(JNIEnv *, jclass);
 
-JNIEXPORT jboolean JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_getHTTPProxyState
+JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_I2PD_1JNI_getHTTPProxyState
 	(JNIEnv *, jclass);
 
-JNIEXPORT jboolean JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_getSOCKSProxyState
+JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_I2PD_1JNI_getSOCKSProxyState
 	(JNIEnv *, jclass);
 
-JNIEXPORT jboolean JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_getBOBState
+JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_I2PD_1JNI_getBOBState
 	(JNIEnv *, jclass);
 
-JNIEXPORT jboolean JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_getSAMState
+JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_I2PD_1JNI_getSAMState
 	(JNIEnv *, jclass) ;
 
-JNIEXPORT jboolean JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_getI2CPState
+JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_I2PD_1JNI_getI2CPState
 	(JNIEnv *, jclass);
 
-JNIEXPORT void JNICALL Java_org_purplei2p_i2pd_I2PD_1JNI_onNetworkStateChanged
+JNIEXPORT void JNICALL Java_org_amistix_owlette_I2PD_1JNI_onNetworkStateChanged
 	(JNIEnv * env, jclass clazz, jboolean isConnected);
 
 #ifdef __cplusplus
