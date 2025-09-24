@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/binary/jni/android-ifaddrs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/binary/jni/boost" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/binary/jni/i2pd" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/binary/jni/miniupnp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/binary/jni/openssl" vcs="Git" />
+  </component>
+</project>

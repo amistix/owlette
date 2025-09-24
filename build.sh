@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-JNI_PATH=app/src/main/jni
+ASSETS_PATH=app/src/main/assets
 APP_PLATFORM=android-21
 
 mkdir -p app/build/ndk
@@ -12,7 +12,10 @@ export NDK_MODULE_PATH=$(pwd)/binary/jni
 
 cd binary/jni
 sh build.sh
-cd ..
+cd ../..
+
+cp -R $NDK_MODULE_PATH/i2pd/contrib/certificates \
+  $ASSETS_PATH/certificates
 
 $ANDROID_NDK_HOME/ndk-build \
   NDK_PROJECT_PATH=app/src/main \

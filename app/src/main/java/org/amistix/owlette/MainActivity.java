@@ -24,8 +24,10 @@ public class MainActivity extends Activity {
 
     private ActivityChannelBinding binding;
     private RecyclerViewAdapter adapter;
+
     private static MainActivity instance;
     private TcpClient tcpClient;
+    private DaemonWrapper daemon;
 
     private String connectedDeviceIp;
 
@@ -50,6 +52,8 @@ public class MainActivity extends Activity {
         EditText editMessage = binding.editMessage;
 
         tcpClient = new TcpClient();
+        daemon = new DaemonWrapper(this);
+        daemon.startDaemon();
 
         buttonSend.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,7 +66,7 @@ public class MainActivity extends Activity {
                 if ("/connect".equals(words[0])){
                     connectedDeviceIp = words[1];
                     adapter.addItem("Device " + connectedDeviceIp + " was added!");
-                    tcpClient.startClient(connectedDeviceIp, 8080, 10000, new TcpClient.MessageHandler() {
+                    tcpClient.startClient(connectedDeviceIp, 9090, 10000, new TcpClient.MessageHandler() {
                         @Override
                         public void onMessage(String msg, InetAddress addr, int port) {
                             return;
@@ -75,6 +79,16 @@ public class MainActivity extends Activity {
                     });
                     return;
                 }
+                else if ("/showwebpage".equals(words[0])){
+                    adapter.addItem(I2PD_JNI.getWebConsAddr());
+                }
+                else if ("/reload".equals(words[0])){
+                    I2PD_JNI.reloadTunnelsConfigs();
+                }
+                else if ("/addtunnelconfig".equals(words[0])){
+                    TunnelsConfig.setTunnelProperty(daemon.getRootPath(), words[1], words[2], words[3]);
+                }
+
                 new AsyncTask<Void, Void, String>() {
                     @Override
                     protected String doInBackground(Void... params) {
@@ -110,5 +124,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        daemon.stopDaemon();
     }
 }

@@ -19,4 +19,4 @@ echo "Cleaning..."
 $ANDROID_NDK_HOME/ndk-build clean
 
 echo "Building i2pd"
-$ANDROID_NDK_HOME/ndk-build 
+# $ANDROID_NDK_HOME/ndk-build 
