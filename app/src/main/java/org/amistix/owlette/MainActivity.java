@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
         binding = ActivityChannelBinding.inflate(getLayoutInflater());
 
         setContentView(binding.getRoot());
-        binding.label.setText("@anon");
+        binding.toolbarTitle.setText("@anon");
 
 
         RecyclerView recyclerView = binding.recyclerGchat;
