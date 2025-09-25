@@ -1,4 +1,4 @@
-package org.amistix.owlette;
+package org.amistix.owlette.i2pd;
 
 import android.content.Context;
 import android.content.res.AssetManager;

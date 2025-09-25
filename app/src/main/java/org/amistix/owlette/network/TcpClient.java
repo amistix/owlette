@@ -1,4 +1,4 @@
-package org.amistix.owlette;
+package org.amistix.owlette.network;
 
 import java.io.*;
 import java.net.*;
@@ -22,6 +22,7 @@ public class TcpClient {
 
                 while (true) {
                     try {
+                        serverSocket.setReuseAddress(true);
                         Socket socket = serverSocket.accept();
                         lastServerSocket = socket;
                         executor.submit(() -> handleClient(socket, handler));

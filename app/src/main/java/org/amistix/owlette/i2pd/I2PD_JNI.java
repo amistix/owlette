@@ -1,4 +1,5 @@
-package org.amistix.owlette;
+package org.amistix.owlette.i2pd;
+
 
 public class I2PD_JNI {
     public static native String getABICompiledWith();

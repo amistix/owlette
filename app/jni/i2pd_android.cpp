@@ -16,55 +16,55 @@
 #include "Tunnel.h"
 
 
-JNIEXPORT jstring JNICALL Java_org_amistix_owlette_I2PD_1JNI_startDaemon
+JNIEXPORT jstring JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_startDaemon
 	(JNIEnv *env, jclass clazz) {
 	return env->NewStringUTF(i2p::android::start().c_str());
 }
 
-JNIEXPORT jstring JNICALL Java_org_amistix_owlette_I2PD_1JNI_getDataDir
+JNIEXPORT jstring JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_getDataDir
 	(JNIEnv *env, jclass clazz) {
 	return env->NewStringUTF(i2p::android::GetDataDir().c_str());
 }
 
-JNIEXPORT void JNICALL Java_org_amistix_owlette_I2PD_1JNI_stopDaemon
+JNIEXPORT void JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_stopDaemon
 	(JNIEnv *env, jclass clazz) {
 	i2p::android::stop();
 }
 
-JNIEXPORT void JNICALL Java_org_amistix_owlette_I2PD_1JNI_stopAcceptingTunnels
+JNIEXPORT void JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_stopAcceptingTunnels
 	(JNIEnv *env, jclass clazz) {
 	i2p::context.SetAcceptsTunnels (false);
 }
 
-JNIEXPORT void JNICALL Java_org_amistix_owlette_I2PD_1JNI_startAcceptingTunnels
+JNIEXPORT void JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_startAcceptingTunnels
 	(JNIEnv *env, jclass clazz) {
 	i2p::context.SetAcceptsTunnels (true);
 }
 
-JNIEXPORT void JNICALL Java_org_amistix_owlette_I2PD_1JNI_reloadTunnelsConfigs
+JNIEXPORT void JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_reloadTunnelsConfigs
 	(JNIEnv *env, jclass clazz) {
 	i2p::client::context.ReloadConfig();
 }
 
-JNIEXPORT void JNICALL Java_org_amistix_owlette_I2PD_1JNI_onNetworkStateChanged
+JNIEXPORT void JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_onNetworkStateChanged
 	(JNIEnv *env, jclass clazz, jboolean isConnected) {
 	bool isConnectedBool = (bool) isConnected;
 	i2p::transport::transports.SetOnline (isConnectedBool);
 }
 
-JNIEXPORT void JNICALL Java_org_amistix_owlette_I2PD_1JNI_setDataDir
+JNIEXPORT void JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_setDataDir
 	(JNIEnv *env, jclass clazz, jstring jdataDir) {
 	auto dataDir = env->GetStringUTFChars(jdataDir, NULL);
 	i2p::android::SetDataDir(dataDir);
 	env->ReleaseStringUTFChars(jdataDir, dataDir);
 }
 
-JNIEXPORT jint JNICALL Java_org_amistix_owlette_I2PD_1JNI_getTransitTunnelsCount
+JNIEXPORT jint JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_getTransitTunnelsCount
 	(JNIEnv *env, jclass clazz) {
 	return i2p::tunnel::tunnels.CountTransitTunnels();
 }
 
-JNIEXPORT jstring JNICALL Java_org_amistix_owlette_I2PD_1JNI_getWebConsAddr
+JNIEXPORT jstring JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_getWebConsAddr
 	(JNIEnv *env, jclass clazz) {
 	std::string httpAddr; i2p::config::GetOption("http.address", httpAddr);
 	uint16_t    httpPort; i2p::config::GetOption("http.port", httpPort);
@@ -72,34 +72,34 @@ JNIEXPORT jstring JNICALL Java_org_amistix_owlette_I2PD_1JNI_getWebConsAddr
 	return env->NewStringUTF(result.c_str());
 }
 
-JNIEXPORT void JNICALL Java_org_amistix_owlette_I2PD_1JNI_setLanguage
+JNIEXPORT void JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_setLanguage
 	(JNIEnv *env, jclass clazz, jstring jlanguage) {
 	auto language = env->GetStringUTFChars(jlanguage, NULL);
 	i2p::android::SetLanguage(language);
 	env->ReleaseStringUTFChars(jlanguage, language);
 }
 
-JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_I2PD_1JNI_getHTTPProxyState
+JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_getHTTPProxyState
 	(JNIEnv *, jclass) {
 	return i2p::client::context.GetHttpProxy () ? true : false;
 }
 
-JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_I2PD_1JNI_getSOCKSProxyState
+JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_getSOCKSProxyState
 	(JNIEnv *, jclass) {
 	return i2p::client::context.GetSocksProxy() ? true : false;
 }
 
-JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_I2PD_1JNI_getBOBState
+JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_getBOBState
 	(JNIEnv *, jclass) {
 	return i2p::client::context.GetBOBCommandChannel() ? true : false;
 }
 
-JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_I2PD_1JNI_getSAMState
+JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_getSAMState
 	(JNIEnv *, jclass) {
 	return i2p::client::context.GetSAMBridge() ? true : false;
 }
 
-JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_I2PD_1JNI_getI2CPState
+JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_getI2CPState
 	(JNIEnv *, jclass) {
 	return i2p::client::context.GetI2CPServer() ? true : false;
 }
