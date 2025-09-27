@@ -8,13 +8,16 @@
             android:id="@+id/nav_home"
             android:title="Home" />
         <item
-            android:id="@+id/nav_qr_code"
+            android:id="@+id/nav_qrcode"
             android:title="QR-code" />
         <item
-            android:id="@+id/nav_edit_tunnel_configs"
+            android:id="@+id/nav_edit_tunnels"
             android:title="Edit Tunnels" />
         <item
             android:id="@+id/nav_settings"
             android:title="Settings" />
+        <item
+            android:id="@+id/nav_channel"
+            android:title="Channel" />
     </group>
 </menu>

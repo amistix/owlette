@@ -16,12 +16,14 @@ import java.util.Locale;
 public class DaemonWrapper {
     private static final String TAG = "DaemonWrapper";
 
-    private final AssetManager assetManager;
-    private final String owlettePath; // public or fallback app-private
-    private static final String appLocale =
-            Locale.getDefault().getDisplayLanguage(Locale.ENGLISH).toLowerCase();
+    private static DaemonWrapper instance;
+    private static boolean daemonRunning = false; 
 
-    public DaemonWrapper(Context ctx) {
+    private final AssetManager assetManager;
+    private final String owlettePath;
+    private static final String appLocale =  Locale.getDefault().getDisplayLanguage(Locale.ENGLISH).toLowerCase();
+
+    private DaemonWrapper(Context ctx) {
         this.assetManager = ctx.getAssets();
 
         // public path we want
@@ -57,18 +59,26 @@ public class DaemonWrapper {
         Log.d(TAG, "using owlettePath = " + this.owlettePath);
     }
 
+    public static DaemonWrapper getInstance(Context ctx) {
+        if (instance == null) {
+            instance = new DaemonWrapper(ctx);
+        }
+        return instance;
+    }
+
     public String getRootPath() {
         return owlettePath;
     }
 
     public synchronized void stopDaemon() {
+        daemonRunning = false;
         I2PD_JNI.stopDaemon();
     }
 
     public synchronized void startDaemon() {
+        if (daemonRunning) return;
+        daemonRunning = true;
         new Thread(() -> {
-            // if you build with Gradle, BuildConfig.VERSION_NAME is available.
-            // If not, replace with a literal string for testing.
             String version = BuildConfig.VERSION_NAME;
             processAssets(version);
             I2PD_JNI.loadLibraries();

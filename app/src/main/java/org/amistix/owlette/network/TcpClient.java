@@ -9,9 +9,15 @@ public class TcpClient {
     private volatile Socket lastClientSocket;
     private volatile Socket lastServerSocket;
 
+    private static boolean serverRunning = false;
+
     public interface MessageHandler {
         void onMessage(String message, InetAddress address, int port);
         void onError(Exception e);
+    }
+
+    public boolean isServerRunning() {
+        return serverRunning;
     }
 
     private final ExecutorService executor = Executors.newCachedThreadPool();
@@ -22,7 +28,7 @@ public class TcpClient {
 
                 while (true) {
                     try {
-                        serverSocket.setReuseAddress(true);
+                        serverRunning = true;
                         Socket socket = serverSocket.accept();
                         lastServerSocket = socket;
                         executor.submit(() -> handleClient(socket, handler));
