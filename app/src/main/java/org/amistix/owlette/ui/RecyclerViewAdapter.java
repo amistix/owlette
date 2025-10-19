@@ -5,21 +5,34 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import org.amistix.owlette.R;
 
-import java.util.List;
+public class RecyclerViewAdapter extends ListAdapter<String, RecyclerViewAdapter.ViewHolder> {
 
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
-
-    private final List<String> items;
-
-    public RecyclerViewAdapter(List<String> items) {
-        this.items = items;
+    public RecyclerViewAdapter() {
+        super(DIFF_CALLBACK);
     }
 
+    private static final DiffUtil.ItemCallback<String> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<String>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull String oldItem, @NonNull String newItem) {
+                    // If you have unique IDs for messages use them here.
+                    return oldItem.equals(newItem);
+                }
+
+                @Override
+                public boolean areContentsTheSame(@NonNull String oldItem, @NonNull String newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView textItem;
+        public final TextView textItem;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -27,25 +40,24 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
             .inflate(R.layout.item_chat_message, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.textItem.setText(items.get(position));
+    public void onBindViewHolder(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
+        holder.textItem.setText(getItem(position));
     }
 
+    // Helper to append a message (keeps use of ListAdapter)
     public void addItem(String item) {
-        items.add(item);
-        notifyItemInserted(items.size() - 1);
-    }
-
-    @Override
-    public int getItemCount() {
-        return items.size();
+        // Make a new list based on current list to submit - ListAdapter expects immutable lists
+        java.util.List<String> newList = new java.util.ArrayList<>(getCurrentList());
+        newList.add(item);
+        submitList(newList);
     }
 }

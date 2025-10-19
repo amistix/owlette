@@ -34,17 +34,14 @@ import org.amistix.owlette.databinding.ActivityChannelBinding;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ChannelFragment extends Fragment {
-
     private RecyclerViewAdapter adapter;
-
     private TcpClient tcpClient;
-    private DaemonWrapper daemon;
-
+    private ExecutorService bgExecutor;
     private String connectedDeviceIp;
-
-    public ChannelFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,63 +49,64 @@ public class ChannelFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_channel, container, false);
         RecyclerView recyclerView = rootView.findViewById(R.id.recycler_gchat);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new RecyclerViewAdapter(new ArrayList<>());
+        adapter = new RecyclerViewAdapter();
         recyclerView.setAdapter(adapter);
 
         Button buttonSend = rootView.findViewById(R.id.button_send);
         EditText editMessage = rootView.findViewById(R.id.edit_message);
 
+        // single executor reused for background tasks (no new threads per message)
+        bgExecutor = Executors.newSingleThreadExecutor();
+
         tcpClient = new TcpClient();
 
-        buttonSend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String message = editMessage.getText().toString();
-                editMessage.getText().clear();
-                if (message.isEmpty()) return;
+        buttonSend.setOnClickListener(v -> {
+            String message = editMessage.getText().toString();
+            editMessage.getText().clear();
+            if (message.isEmpty()) return;
 
-                switchCommands(message);
+            switchCommands(message);
 
-                new Thread(() -> {
+            bgExecutor.submit(() -> {
+                try {
                     tcpClient.sendFromClient(message);
-
+                } catch (Exception e) {
+                    // log or handle
+                }
+                if (isAdded()) {
                     requireActivity().runOnUiThread(() -> {
                         adapter.addItem(message);
                         recyclerView.scrollToPosition(adapter.getItemCount() - 1);
                     });
-                }).start();
+                }
+            });
+        });
+
+        // Start server in background to avoid blocking UI
+        bgExecutor.submit(() -> {
+            if (!tcpClient.isServerRunning()) {
+                tcpClient.startServer(8080, new TcpClient.MessageHandler() {
+                    @Override
+                    public void onMessage(String message, InetAddress addr, int port) {
+                        if (message.isEmpty()) return;
+                        if (isAdded()) {
+                            requireActivity().runOnUiThread(() -> {
+                                adapter.addItem(message);
+                                recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        // handle error (post to UI if needed)
+                    }
+                });
             }
         });
 
-        if (!tcpClient.isServerRunning()) {
-            tcpClient.startServer(8080, new TcpClient.MessageHandler() {
-                @Override
-                public void onMessage(String message, InetAddress addr, int port) {
-                    if (message.isEmpty()) return;
-                    if (isAdded()) {
-                        requireActivity().runOnUiThread(() -> {
-                            adapter.addItem(message);
-                            recyclerView.scrollToPosition(adapter.getItemCount() - 1);
-                        });
-                    }
-                }
-
-                @Override
-                public void onError(Exception e) {
-                    if (isAdded()) {
-                        requireActivity().runOnUiThread(() -> {
-                            adapter.addItem("[SERVER ERROR] " + e.getMessage());
-                            recyclerView.scrollToPosition(adapter.getItemCount() - 1);
-                        });
-                    }
-                }
-            });
-        }
-        
-
         return rootView;
     }
-
     private void switchCommands(String message) {
         String[] words = message.split("\\s+");
         switch (words[0]) {
@@ -135,11 +133,19 @@ public class ChannelFragment extends Fragment {
             case "/reload":
                 I2PD_JNI.reloadTunnelsConfigs();
                 break;
+        }
+    }
 
-            // case "/addtunnelconfig":
-            //     TunnelsConfig.setTunnelProperty(daemon.getRootPath(), words[1], words[2], words[3]);
-            //     break;
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Shutdown executor and stop server to avoid leaks
+        if (bgExecutor != null) {
+            bgExecutor.shutdownNow();
+            bgExecutor = null;
+        }
+        if (tcpClient != null) {
+            tcpClient = null;
         }
     }
 }
-
