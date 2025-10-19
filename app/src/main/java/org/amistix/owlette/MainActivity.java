@@ -24,10 +24,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //Starting i2p daemon
-        new Thread(() -> {
-                daemon = DaemonWrapper.getInstance(this);
-                daemon.startDaemon();
-        }).start();
+        // new Thread(() -> {
+        //         daemon = DaemonWrapper.getInstance(this);
+        //         daemon.startDaemon();
+        // }).start();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
