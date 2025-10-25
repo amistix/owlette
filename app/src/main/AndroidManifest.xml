@@ -15,6 +15,8 @@
         android:usesCleartextTraffic="true"
         android:label="Owlette"
         android:supportsRtl="true"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:icon="@mipmap/ic_launcher"
         android:theme="@style/Theme.Owlette">
         <activity
             android:name=".MainActivity"
