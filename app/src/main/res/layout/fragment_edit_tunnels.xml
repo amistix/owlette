@@ -5,71 +5,77 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.ChannelFragment">
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:orientation="vertical">
-    <RelativeLayout
-        android:id="@+id/tunnels_information"
+    <android.widget.ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/server_tunnels"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar">
-
-        <TextView
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical">
+        <RelativeLayout
+            android:id="@+id/tunnels_information"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="4dp"
-            android:text="Here you can manage both inbound and outbound tunnels\n You can do it manually with file tunnels.conf" />
-    </RelativeLayout>
+            app:layout_constraintBottom_toTopOf="@+id/server_tunnels"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
-    <RelativeLayout
-        android:id="@+id/relativeLayout"
-        android:layout_width="match_parent"
-        android:layout_height="15dp"
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="4dp"
+                android:text="Here you can manage both inbound and outbound tunnels\n You can do it manually with file tunnels.conf" />
+        </RelativeLayout>
 
-        android:background="@color/grey"
-        app:layout_constraintTop_toBottomOf="@+id/tunnels_information" />
-
-    <RelativeLayout
-        android:id="@+id/server_tunnels"
-        app:layout_constraintBottom_toTopOf="@+id/client_tunnels"
-        app:layout_constraintTop_toBottomOf="@+id/relativeLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_client_tunnels"
+        <RelativeLayout
+            android:id="@+id/relativeLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </RelativeLayout>
+            android:layout_height="15dp"
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="15dp"
-        app:layout_constraintTop_toBottomOf="@+id/server_tunnels"
-        android:background="@color/grey"/>
+            android:background="@color/grey"
+            app:layout_constraintTop_toBottomOf="@+id/tunnels_information" />
 
-
-    <RelativeLayout
-        android:id="@+id/client_tunnels"
-        app:layout_constraintTop_toBottomOf="@+id/server_tunnels"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_server_tunnels"
+        <RelativeLayout
+            android:id="@+id/server_tunnels"
+            app:layout_constraintBottom_toTopOf="@+id/client_tunnels"
+            app:layout_constraintTop_toBottomOf="@+id/relativeLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </RelativeLayout>
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:id="@+id/recycler_client_tunnels"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"></LinearLayout>
+        </RelativeLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:minHeight="15dp"
-        android:background="@color/grey"
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            app:layout_constraintTop_toBottomOf="@+id/server_tunnels"
+            android:background="@color/grey"/>
 
-        android:layout_weight="1"
-        app:layout_constraintTop_toBottomOf="@+id/client_tunnels" />
-    </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/client_tunnels"
+            app:layout_constraintTop_toBottomOf="@+id/server_tunnels"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:id="@+id/recycler_server_tunnels"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"></LinearLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:minHeight="15dp"
+            android:background="@color/grey"
+
+            android:layout_weight="1"
+            app:layout_constraintTop_toBottomOf="@+id/client_tunnels" />
+        </LinearLayout>
+    </android.widget.ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

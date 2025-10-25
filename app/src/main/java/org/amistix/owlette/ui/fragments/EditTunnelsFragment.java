@@ -5,35 +5,48 @@ import org.amistix.owlette.*;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.TextView;
 import android.view.ViewGroup;
-import androidx.recyclerview.widget.RecyclerView;
-import org.amistix.owlette.ui.RecyclerViewAdapter;
+import android.widget.LinearLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
+import org.amistix.owlette.i2pd.*;
 
 import android.os.Bundle;
 
 public class EditTunnelsFragment extends Fragment {
+    private DaemonWrapper daemon;
 
-    private RecyclerViewAdapter adapter1;
-    private RecyclerViewAdapter adapter2;
     public EditTunnelsFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_edit_tunnels, container, false);
-        RecyclerView recyclerView = rootView.findViewById(R.id.recycler_client_tunnels);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter1 = new RecyclerViewAdapter();
-        adapter2 = new RecyclerViewAdapter();
-        recyclerView.setAdapter(adapter1);
-        adapter1.addItem("Hsdfsfsfi");
-        adapter1.addItem("Heloosdfsf");
-        RecyclerView recyclerView1 = rootView.findViewById(R.id.recycler_server_tunnels);
-        recyclerView1.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView1.setAdapter(adapter2);
-        adapter2.addItem("Hihi");
-        adapter2.addItem("Helghoo");
+        LinearLayout recyclerView = rootView.findViewById(R.id.recycler_client_tunnels);
+
+        daemon = DaemonWrapper.getInstance(getContext());
+        for (String tunnel : TunnelsConfig.getTunnels(daemon.getRootPath())) {
+            TextView textView = new TextView(getContext());
+            textView.setTextSize(16);
+            textView.setTextColor(android.graphics.Color.BLACK); 
+            textView.setText(tunnel);
+
+            recyclerView.addView(textView);
+            recyclerView.invalidate();
+        }
+        LinearLayout recyclerView1 = rootView.findViewById(R.id.recycler_server_tunnels);
+        for (int i=0; i < 100; i++)
+        {
+            TextView textView = new TextView(getContext());
+            textView.setTextSize(16);
+            textView.setText("hi");
+
+            recyclerView1.addView(textView);
+            recyclerView1.invalidate();
+        }
+        
+
 
         return rootView;
     }

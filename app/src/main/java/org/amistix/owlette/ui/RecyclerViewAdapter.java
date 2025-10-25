@@ -6,30 +6,17 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import org.amistix.owlette.R;
 
-public class RecyclerViewAdapter extends ListAdapter<String, RecyclerViewAdapter.ViewHolder> {
+import java.util.ArrayList;
+import java.util.List;
 
-    public RecyclerViewAdapter() {
-        super(DIFF_CALLBACK);
-    }
+public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
-    private static final DiffUtil.ItemCallback<String> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<String>() {
-                @Override
-                public boolean areItemsTheSame(@NonNull String oldItem, @NonNull String newItem) {
-                    // If you have unique IDs for messages use them here.
-                    return oldItem.equals(newItem);
-                }
+    private final List<String> items = new ArrayList<>();
 
-                @Override
-                public boolean areContentsTheSame(@NonNull String oldItem, @NonNull String newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
+    public RecyclerViewAdapter() { }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public final TextView textItem;
@@ -50,14 +37,25 @@ public class RecyclerViewAdapter extends ListAdapter<String, RecyclerViewAdapter
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.textItem.setText(getItem(position));
+        holder.textItem.setText(items.get(position));
     }
 
-    // Helper to append a message (keeps use of ListAdapter)
+    @Override
+    public int getItemCount() {
+        return items.size();
+    }
+
+    // Call this on the main/UI thread
     public void addItem(String item) {
-        // Make a new list based on current list to submit - ListAdapter expects immutable lists
-        java.util.List<String> newList = new java.util.ArrayList<>(getCurrentList());
-        newList.add(item);
-        submitList(newList);
+        int pos = items.size();
+        items.add(item);
+        notifyItemInserted(pos);
+    }
+
+    // Optional helpers if you need to reset list or batch insert
+    public void setItems(List<String> newItems) {
+        items.clear();
+        items.addAll(newItems);
+        notifyDataSetChanged();
     }
 }
