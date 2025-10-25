@@ -6,8 +6,9 @@
     android:layout_height="match_parent"
     tools:context=".ui.ChannelFragment">
     <android.widget.ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@color/grey">
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -17,7 +18,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toTopOf="@+id/server_tunnels"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar">
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"
+            android:background="@color/white">
 
             <TextView
                 android:layout_width="match_parent"
@@ -28,19 +30,13 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:id="@+id/relativeLayout"
-            android:layout_width="match_parent"
-            android:layout_height="15dp"
-
-            android:background="@color/grey"
-            app:layout_constraintTop_toBottomOf="@+id/tunnels_information" />
-
-        <RelativeLayout
             android:id="@+id/server_tunnels"
             app:layout_constraintBottom_toTopOf="@+id/client_tunnels"
             app:layout_constraintTop_toBottomOf="@+id/relativeLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:layout_marginTop="10dp">
             <LinearLayout
                 android:id="@+id/recycler_client_tunnels"
                 android:layout_width="match_parent"
@@ -49,17 +45,12 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="15dp"
-            app:layout_constraintTop_toBottomOf="@+id/server_tunnels"
-            android:background="@color/grey"/>
-
-
-        <RelativeLayout
             android:id="@+id/client_tunnels"
             app:layout_constraintTop_toBottomOf="@+id/server_tunnels"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:layout_marginTop="10dp">
             <LinearLayout
                 android:id="@+id/recycler_server_tunnels"
                 android:layout_width="match_parent"
@@ -70,10 +61,9 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:minHeight="15dp"
             android:background="@color/grey"
-
             android:layout_weight="1"
             app:layout_constraintTop_toBottomOf="@+id/client_tunnels" />
         </LinearLayout>

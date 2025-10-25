@@ -49,6 +49,9 @@ JNIEXPORT jstring JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_getWebConsAddr
 JNIEXPORT jstring JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_getDataDir
 	(JNIEnv *, jclass);
 
+JNIEXPORT jstring JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_getBase64Destination
+	(JNIEnv *env, jclass clazz, jstring jtunnelname);
+
 JNIEXPORT jboolean JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_getHTTPProxyState
 	(JNIEnv *, jclass);
 

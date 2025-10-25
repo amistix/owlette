@@ -2,6 +2,11 @@ package org.amistix.owlette.i2pd;
 
 import java.io.*;
 import java.util.*;
+import java.nio.file.*;
+import java.security.MessageDigest;
+import org.apache.commons.codec.binary.Base32;
+import java.security.NoSuchAlgorithmException;
+
 
 public class TunnelsConfig {
 
@@ -59,4 +64,24 @@ public class TunnelsConfig {
         String tunnelsConfigFile = tunnelsConfigPath + "/tunnels.conf";
         return readConfiguration(tunnelsConfigFile).getOrDefault(tunnelName, Collections.emptyMap());
     }
+
+    public static String getTunnelDestination(String tunnelName)
+            throws IOException{
+        
+        return DaemonWrapper.getBase64Destination(tunnelName);
+    }
+
+    public static String getTunnelBase32(String tunnelKeyFileName)
+            throws IOException, NoSuchAlgorithmException {
+        String base64 = getTunnelDestination(tunnelKeyFileName);
+        byte[] decoded = Base64.getDecoder().decode(base64);
+
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = digest.digest(decoded);
+
+        Base32 base32 = new Base32();
+        String b32 = base32.encodeToString(hash).toLowerCase().replace("=", "");
+
+        return b32 + ".b32.i2p";
+}
 }

@@ -66,6 +66,11 @@ public class DaemonWrapper {
         return instance;
     }
 
+    public static String getBase64Destination(String tunnelName)
+    {
+        return I2PD_JNI.getBase64Destination(tunnelName);
+    }
+
     public String getRootPath() {
         return owlettePath;
     }

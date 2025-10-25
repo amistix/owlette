@@ -72,6 +72,12 @@ JNIEXPORT jstring JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_getWebConsAddr
 	return env->NewStringUTF(result.c_str());
 }
 
+JNIEXPORT jstring JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_getBase64Destination
+	(JNIEnv *env, jclass clazz, jstring jtunnelName) {
+	auto tunnelName = env->GetStringUTFChars(jtunnelName, NULL);
+	return env->NewStringUTF(i2p::android::GetBase64Destination(tunnelName).c_str());
+}
+
 JNIEXPORT void JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_setLanguage
 	(JNIEnv *env, jclass clazz, jstring jlanguage) {
 	auto language = env->GetStringUTFChars(jlanguage, NULL);

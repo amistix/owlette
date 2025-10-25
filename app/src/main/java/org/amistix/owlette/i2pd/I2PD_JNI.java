@@ -21,6 +21,7 @@ public class I2PD_JNI {
 
     public static native void setDataDir(String jdataDir);
     public static native void setLanguage(String jlanguage);
+    public static native String getBase64Destination(String jtunnelName);
 
     public static native int getTransitTunnelsCount();
     public static native String getWebConsAddr();
