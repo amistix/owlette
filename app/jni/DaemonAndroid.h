@@ -31,6 +31,8 @@ namespace android
 		void restart ();
 
 		void setDataDir (std::string path);
+		std::string GetBase64Destination(std::string tunnelName);
+		
 	};
 
 	/**
@@ -45,6 +47,7 @@ namespace android
 	void SetDataDir (std::string jdataDir);
 	// get datadir
 	std::string GetDataDir (void);
+	std::string GetBase64Destination(std::string tunnelname);
 	// set webconsole language
 	void SetLanguage (std::string jlanguage);
 }

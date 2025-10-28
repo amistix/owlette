@@ -8,7 +8,7 @@ LOCAL_STATIC_LIBRARIES := \
 	boost_program_options \
 	crypto \
 	ssl \
-	miniupnpc
+	miniupnpc 
 LOCAL_LDLIBS := -lz
 LOCAL_SRC_FILES := \
 	DaemonAndroid.cpp \

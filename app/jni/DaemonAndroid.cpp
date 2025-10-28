@@ -17,6 +17,10 @@
 #include "DaemonAndroid.h"
 #include "Daemon.h"
 #include "I18N.h"
+// #include <regex>
+// #include "ClientContext.h"
+// #include "PrivateKeys.h"
+// #include <boost/asio.hpp>
 
 namespace i2p
 {
@@ -133,6 +137,48 @@ namespace android
 	void SetLanguage(std::string jlanguage)
 	{
 		language = jlanguage;
+	}
+
+	std::string GetBase64Destination(std::string tunnelName)
+	{
+		// boost::asio::io_context io_context;
+
+		// tcp::resolver resolver(io_context);
+		// auto endpoints = resolver.resolve("127.0.0.1", "7070");
+		// tcp::socket socket(io_context);
+		// boost::asio::connect(socket, endpoints);
+
+		// // Prepare the HTTP GET request
+		// std::string request = "GET / HTTP/1.1\r\n";
+		// request += "Host: 127.0.0.1?page=i2p_tunnels \r\n";
+		// request += "Connection: close\r\n\r\n";
+
+		// // Send the HTTP request
+		// boost::asio::write(socket, boost::asio::buffer(request));
+
+		// // Read the response
+		// boost::asio::streambuf response_buffer;
+		// boost::asio::read_until(socket, response_buffer, "\r\n\r\n");
+
+		// // Convert the response buffer to a string
+		// std::string response(boost::asio::buffer_cast<const char*>(response_buffer.data()), response_buffer.size());
+
+		// // Continue reading the rest of the response (body)
+		// boost::asio::read(socket, response_buffer, boost::asio::transfer_all());
+
+		// response.append(boost::asio::buffer_cast<const char*>(response_buffer.data()), response_buffer.size());
+		// if(curl) {
+		// 	std::regex tunnelPattern("<a href=\"[^\"]*\\?page=local_destination&b32=([a-z2-7]{52})\">\\s*" + tunnelName + "\\s*</a>");
+    
+		// 	std::smatch match;
+		// 	if (std::regex_search(readBuffer, match, tunnelPattern)) {
+		// 		// The Base32 destination hash is the first capturing group in the regex match
+		// 		return match[1].str();
+		// 	}
+
+		// 	return "";
+		// }
+		return "Not implemented";
 	}
 }
 }

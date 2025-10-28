@@ -13,3 +13,6 @@
 [submodule "binary/jni/android-ifaddrs"]
 	path = binary/jni/android-ifaddrs
 	url = git@github.com:PurpleI2P/android-ifaddrs.git
+[submodule "binary/jni/curl"]
+	path = binary/jni/curl
+	url = git@github.com:curl/curl.git
