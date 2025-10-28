@@ -29,43 +29,100 @@
                 android:text="Here you can manage both inbound and outbound tunnels\n You can do it manually with file tunnels.conf" />
         </RelativeLayout>
 
-        <RelativeLayout
-            android:id="@+id/server_tunnels"
-            app:layout_constraintBottom_toTopOf="@+id/client_tunnels"
+        <LinearLayout
+            android:id="@+id/client_tunnels"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@+id/server_tunnels"
             app:layout_constraintTop_toBottomOf="@+id/relativeLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/white"
             android:layout_marginTop="10dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="4dp"
+                android:textStyle="bold"
+                android:textColor="@color/raspberry"
+                android:text="Client tunnels"
+                android:layout_marginStart="40dp" />
             <LinearLayout
                 android:id="@+id/recycler_client_tunnels"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"></LinearLayout>
-        </RelativeLayout>
+        </LinearLayout>
 
-        <RelativeLayout
-            android:id="@+id/client_tunnels"
-            app:layout_constraintTop_toBottomOf="@+id/server_tunnels"
+        <LinearLayout
+            android:id="@+id/server_tunnels"
+            app:layout_constraintTop_toBottomOf="@+id/client_tunnels"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:background="@color/white"
             android:layout_marginTop="10dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="4dp"
+                android:textStyle="bold"
+                android:textColor="@color/raspberry"
+                android:text="Server tunnels"
+                android:layout_marginStart="40dp" />
             <LinearLayout
                 android:id="@+id/recycler_server_tunnels"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"></LinearLayout>
-        </RelativeLayout>
+        </LinearLayout>
 
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/edit_frame"
+            app:layout_constraintTop_toBottomOf="@+id/server_tunnels"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:minHeight="15dp"
-            android:background="@color/grey"
-            android:layout_weight="1"
-            app:layout_constraintTop_toBottomOf="@+id/client_tunnels" />
+            android:orientation="vertical"
+            android:background="@color/white"
+            android:layout_marginTop="10dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="4dp"
+                android:textStyle="bold"
+                android:textColor="@color/raspberry"
+                android:text="Edit tunnel"
+                android:layout_marginStart="40dp" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"
+                android:fitsSystemWindows="true">
+                <EditText
+                    android:id="@+id/edit_field"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="16dp"
+                    android:background="@android:color/transparent"
+                    android:hint="tunnel.property value"
+                    android:inputType="text"
+                    android:maxLines="6"
+                    android:minHeight="48dp"
+                    tools:ignore="Autofill" />
+                <Button
+                    android:id="@+id/button_apply"
+                    android:layout_width="100dp"
+                    android:layout_height="48dp"
+                    android:layout_alignParentEnd="true"
+                    android:background="?attr/selectableItemBackground"
+                    android:text="Apply"
+                    android:textColor="@color/raspberry" />
+            </RelativeLayout>
+        </LinearLayout>
         </LinearLayout>
     </android.widget.ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
