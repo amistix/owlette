@@ -65,6 +65,111 @@ public class TunnelsConfig {
         return readConfiguration(tunnelsConfigFile).getOrDefault(tunnelName, Collections.emptyMap());
     }
 
+    public static boolean isTunnelCommentedOut(String tunnelsConfigPath, String tunnelName) {
+        Path configPath = Paths.get(tunnelsConfigPath, "tunnels.conf");
+
+        try {
+            List<String> lines = Files.readAllLines(configPath);
+
+            for (String line : lines) {
+                String trimmed = line.trim();
+
+                if (trimmed.equals("#[" + tunnelName + "]") || trimmed.equals(";[" + tunnelName + "]")) {
+                    return true;
+                }
+                if (trimmed.equals("[" + tunnelName + "]")) {
+                    return false;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public static void commentOutTunnel(String tunnelsConfigPath, String tunnelName) {
+        Path configPath = Paths.get(tunnelsConfigPath, "tunnels.conf");
+        List<String> lines;
+        try {
+            lines = Files.readAllLines(configPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        List<String> newLines = new ArrayList<>();
+        boolean inTargetSection = false;
+
+        for (String line : lines) {
+            String trimmed = line.trim();
+
+            if (trimmed.equals("[" + tunnelName + "]")) {
+                inTargetSection = true;
+                newLines.add("#" + line);
+                continue;
+            }
+
+            if (inTargetSection && trimmed.startsWith("[") && trimmed.endsWith("]")) {
+                inTargetSection = false;
+            }
+
+            if (inTargetSection) {
+                if (!trimmed.startsWith("#") && !trimmed.startsWith(";")) {
+                    newLines.add("#" + line);
+                } else {
+                    newLines.add(line);
+                }
+            } else {
+                newLines.add(line);
+            }
+        }
+
+        try {
+            Files.write(configPath, newLines);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void removeTunnel(String tunnelsConfigPath, String tunnelName) {
+        Path configPath = Paths.get(tunnelsConfigPath, "tunnels.conf");
+        List<String> lines;
+        try {
+            lines = Files.readAllLines(configPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        List<String> newLines = new ArrayList<>();
+        boolean inTargetSection = false;
+
+        for (String line : lines) {
+            String trimmed = line.trim();
+
+            if (trimmed.equals("[" + tunnelName + "]") || trimmed.equals("#[" + tunnelName + "]")) {
+                inTargetSection = true;
+                continue;
+            }
+
+            if (inTargetSection && (trimmed.startsWith("[") || trimmed.startsWith("#[")) && trimmed.endsWith("]")) {
+                inTargetSection = false;
+            }
+
+            if (!inTargetSection) {
+                newLines.add(line);
+            }
+        }
+
+        try {
+            Files.write(configPath, newLines);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public static String getTunnelDestination(String tunnelName)
             throws IOException{
         
