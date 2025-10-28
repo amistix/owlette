@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:id="@+id/widget_edititem"
@@ -12,21 +14,30 @@
         android:layout_marginBottom="5dp"
         android:layout_margin="10dp"
         android:background="#fffdfdfd">
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/mySwitch"
+                    app:thumbTint="@color/raspberry"
+                    app:trackTint="@color/track_tint_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
 
-            android:layout_marginStart="100dp"
+                android:layout_marginEnd="10dp"
+                android:padding="10dp"
+                android:id="@+id/tunnel_name"
 
-            android:layout_marginEnd="10dp"
-            android:padding="10dp"
-            android:id="@+id/tunnel_name"
+                android:textColor="@color/black"
+                android:text="Lorem ipsum"
+                android:layout_gravity="end"
 
-            android:textColor="@color/black"
-            android:text="Lorem ipsum"
-            android:layout_gravity="end"
-
-            android:ellipsize="end" />
+                android:ellipsize="end" />
+        </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
