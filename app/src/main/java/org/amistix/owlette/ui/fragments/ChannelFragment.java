@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import java.io.IOException;
 import android.os.AsyncTask;
-
+import android.widget.Toast;
 
 import org.amistix.owlette.network.TcpClient;
 import org.amistix.owlette.i2pd.*;
@@ -58,7 +58,20 @@ public class ChannelFragment extends Fragment {
         // single executor reused for background tasks (no new threads per message)
         bgExecutor = Executors.newSingleThreadExecutor();
 
-        tcpClient = new TcpClient();
+        tcpClient = TcpClient.getInstance();
+
+        tcpClient.startClient(10000, new TcpClient.MessageHandler() {
+            @Override
+            public void onMessage(String msg, InetAddress addr, int port) {
+                return;
+            }
+
+            @Override
+            public void onError(Exception e) {
+                adapter.addItem("[CLIENT ERROR] " + e.getMessage());
+            }
+        });
+        Toast.makeText(getContext(), "Loaded", Toast.LENGTH_SHORT).show();
 
         buttonSend.setOnClickListener(v -> {
             String message = editMessage.getText().toString();
@@ -110,22 +123,6 @@ public class ChannelFragment extends Fragment {
     private void switchCommands(String message) {
         String[] words = message.split("\\s+");
         switch (words[0]) {
-            case "/connect":
-                connectedDeviceIp = words[1];
-                adapter.addItem("Device " + connectedDeviceIp + " was added!");
-                tcpClient.startClient(connectedDeviceIp, Integer.valueOf(words[2]), 10000, new TcpClient.MessageHandler() {
-                    @Override
-                    public void onMessage(String msg, InetAddress addr, int port) {
-                        return;
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        adapter.addItem("[CLIENT ERROR] " + e.getMessage());
-                    }
-                });
-                break;
-
             case "/showwebpage":
                 adapter.addItem(I2PD_JNI.getWebConsAddr());
                 break;

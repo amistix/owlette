@@ -11,6 +11,11 @@ public class TcpClient {
 
     private static boolean serverRunning = false;
 
+    private String clientAddress = "127.0.0.1";
+    private int clientPort = 9090;
+
+    private static TcpClient clientInstance;
+
     public interface MessageHandler {
         void onMessage(String message, InetAddress address, int port);
         void onError(Exception e);
@@ -18,6 +23,18 @@ public class TcpClient {
 
     public boolean isServerRunning() {
         return serverRunning;
+    }
+    public static TcpClient getInstance() {
+        if (clientInstance == null) {
+            clientInstance = new TcpClient();
+        }
+        return clientInstance;
+    }
+
+    public void setClientHost(String address, int port)
+    {
+        this.clientAddress = address;
+        this.clientPort = port;
     }
 
     private final ExecutorService executor = Executors.newCachedThreadPool();
@@ -56,10 +73,10 @@ public class TcpClient {
         }
     }
 
-    public void startClient(String host, int port, int timeoutMs, MessageHandler handler) {
+    public void startClient(int timeoutMs, MessageHandler handler) {
         executor.submit(() -> {
             try (Socket socket = new Socket()) {
-                socket.connect(new InetSocketAddress(host, port), timeoutMs);
+                socket.connect(new InetSocketAddress(clientAddress, clientPort), timeoutMs);
                 lastClientSocket = socket;
 
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -72,7 +89,7 @@ public class TcpClient {
                     handler.onMessage(line, socket.getInetAddress(), socket.getPort());
                 }
             } catch (SocketTimeoutException e) {
-                handler.onError(new IOException("Connection to " + host + ":" + port + " timed out", e));
+                handler.onError(new IOException("Connection to " + clientAddress + ":" + clientPort + " timed out", e));
             } catch (IOException e) {
                 handler.onError(e);
             }

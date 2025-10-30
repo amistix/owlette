@@ -12,6 +12,10 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment:2.8.3"
     implementation "androidx.navigation:navigation-ui:2.8.3"
     implementation 'commons-codec:commons-codec:1.16.0'
+    implementation "androidx.room:room-runtime:2.5.2"
+    annotationProcessor "androidx.room:room-compiler:2.5.2"
+    implementation "net.zetetic:android-database-sqlcipher:4.5.4" 
+    implementation "androidx.sqlite:sqlite-framework:2.2.0"
 }
 
 
