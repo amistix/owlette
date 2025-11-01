@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Top-level destinations
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_edit_tunnels, R.id.nav_channel, R.id.nav_home, R.id.nav_settings, R.id.nav_qrcode
+                R.id.nav_edit_tunnels, R.id.nav_home, R.id.nav_settings, R.id.nav_qrcode
                 )
                 .setOpenableLayout(drawer)
                 .build();
@@ -56,4 +56,12 @@ public class MainActivity extends AppCompatActivity {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (daemon != null) {
+            daemon.stopDaemon();
+        }
+    }
+
 }

@@ -63,7 +63,7 @@ public class ChannelFragment extends Fragment {
         tcpClient.startClient(10000, new TcpClient.MessageHandler() {
             @Override
             public void onMessage(String msg, InetAddress addr, int port) {
-                return;
+                adapter.addItem("[CLIENT RESPONSE] " + msg);
             }
 
             @Override

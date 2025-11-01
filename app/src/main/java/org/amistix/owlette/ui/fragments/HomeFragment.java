@@ -2,7 +2,6 @@ package org.amistix.owlette.ui;
 
 import org.amistix.owlette.*;
 import org.amistix.owlette.i2pd.*;
-import com.amistix.owlette.contacts.*;
 import org.amistix.owlette.network.*;
 
 import androidx.fragment.app.Fragment;
@@ -16,6 +15,9 @@ import android.widget.Toast;
 import android.os.Bundle;
 import java.util.Set;
 import java.util.Map;
+
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 
 public class HomeFragment extends Fragment {
 
@@ -50,6 +52,7 @@ public class HomeFragment extends Fragment {
                 TcpClient client = TcpClient.getInstance();
                 client.setClientHost(props.get("address"), Integer.parseInt(props.get("port")));
                 Toast.makeText(getContext(), "Loading "+ props.get("destination"), Toast.LENGTH_SHORT).show();
+                NavHostFragment.findNavController(this).navigate(R.id.nav_channel);
             });
 
             contactsFrame.addView(contactFrame);
