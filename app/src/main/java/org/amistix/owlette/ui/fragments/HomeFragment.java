@@ -47,10 +47,10 @@ public class HomeFragment extends Fragment {
             String contactName = props.getOrDefault("name", "Undefined");
             ((TextView) contactFrame.findViewById(R.id.contact_name))
                 .setText(contactName);
-
+                
             contactFrame.setOnClickListener(v -> {
                 TcpClient client = TcpClient.getInstance();
-                client.setClientHost(props.get("address"), Integer.parseInt(props.get("port")));
+                client.setClientHost(props.get("address"), Integer.parseInt(props.get("port")), Integer.parseInt(props.get("destinationport")));
                 Toast.makeText(getContext(), "Loading "+ props.get("destination"), Toast.LENGTH_SHORT).show();
                 NavHostFragment.findNavController(this).navigate(R.id.nav_channel);
             });
