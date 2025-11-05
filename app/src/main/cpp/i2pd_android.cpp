@@ -14,7 +14,7 @@
 #include "ClientContext.h"
 #include "Transports.h"
 #include "Tunnel.h"
-
+#include "native-lib.cpp"
 
 JNIEXPORT jstring JNICALL Java_org_amistix_owlette_i2pd_I2PD_1JNI_startDaemon
 	(JNIEnv *env, jclass clazz) {

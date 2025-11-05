@@ -101,4 +101,6 @@ target_link_libraries(i2pd
     miniupnpc
     z      
     log
+    EGL
+    GLESv2
 )
