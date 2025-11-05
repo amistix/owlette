@@ -21,12 +21,12 @@ add_compile_options(-fexceptions -frtti -DANDROID_BINARY -DANDROID -D__ANDROID__
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # --- Paths (equivalent to your Application.mk variables) ---
-set(IFADDRS_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../external/android-ifaddrs)
-set(BOOST_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../external/boost)
-set(MINIUPNP_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../external/miniupnp)
-set(OPENSSL_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../external/openssl)
+set(IFADDRS_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/android-ifaddrs)
+set(BOOST_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/boost)
+set(MINIUPNP_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/miniupnp)
+set(OPENSSL_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/openssl)
 
-set(I2PD_SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../external/i2pd)
+set(I2PD_SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/i2pd)
 set(LIB_SRC_PATH ${I2PD_SRC_PATH}/libi2pd)
 set(LIB_CLIENT_SRC_PATH ${I2PD_SRC_PATH}/libi2pd_client)
 set(LANG_SRC_PATH ${I2PD_SRC_PATH}/i18n)
@@ -85,6 +85,7 @@ add_library(i2pd SHARED ${SRC_FILES})
 
 # Include directories
 target_include_directories(i2pd PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${IFADDRS_PATH}
     ${LIB_SRC_PATH}
     ${LIB_CLIENT_SRC_PATH}
@@ -98,6 +99,6 @@ target_link_libraries(i2pd
     crypto
     ssl
     miniupnpc
-    z      # equivalent to -lz
-    log    # always link log for Android
+    z      
+    log
 )

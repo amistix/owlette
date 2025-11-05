@@ -35,7 +35,7 @@ android {
 
     externalNativeBuild {
         cmake {
-            path = "jni/CMakeLists.txt"   // <--- must be OUTSIDE defaultConfig
+            path = "src/main/cpp/CMakeLists.txt"   // <--- must be OUTSIDE defaultConfig
             version = "3.22.1"
         }
     }
