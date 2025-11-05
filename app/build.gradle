@@ -2,14 +2,7 @@ plugins {
     id 'com.android.application' 
 }
 
-dependencies {
-    implementation 'androidx.core:core:1.6.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-}
-
-
 android {
-    
     compileSdkVersion 34
 
     defaultConfig {
@@ -24,31 +17,32 @@ android {
         }
 
         externalNativeBuild {
-            ndkBuild {
-                arguments "NDK_MODULE_PATH:=${rootProject.projectDir}/binary/jni"
+            cmake {
+                cppFlags "-std=c++17 -fexceptions -frtti -DANDROID_BINARY -DANDROID -D__ANDROID__ -DUSE_UPNP -Wno-deprecated-declarations"
             }
         }
     }
 
     buildFeatures {
-        buildConfig true
+        buildConfig = true
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled = false
         }
     }
 
     externalNativeBuild {
-        ndkBuild {
-            path 'jni/Android.mk'
+        cmake {
+            path = "jni/CMakeLists.txt"   // <--- must be OUTSIDE defaultConfig
+            version = "3.22.1"
         }
     }
 
     sourceSets {
         main {
-            jniLibs.srcDirs = ['app/build/ndk/libs', 'binary/libs']
+            jniLibs.srcDirs = ['app/build/ndk/libs']
         }
     }
 
@@ -61,5 +55,10 @@ android {
         enabled = true
     }
     
-    namespace 'org.amistix.owlette' 
+    namespace = 'org.amistix.owlette' 
+}
+
+dependencies {
+    implementation 'androidx.core:core:1.6.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
 }

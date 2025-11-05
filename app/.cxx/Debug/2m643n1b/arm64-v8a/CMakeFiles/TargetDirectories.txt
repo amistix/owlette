@@ -1,0 +1,3 @@
+/home/amistix/a/owlette/app/.cxx/Debug/2m643n1b/arm64-v8a/CMakeFiles/i2pd.dir
+/home/amistix/a/owlette/app/.cxx/Debug/2m643n1b/arm64-v8a/CMakeFiles/edit_cache.dir
+/home/amistix/a/owlette/app/.cxx/Debug/2m643n1b/arm64-v8a/CMakeFiles/rebuild_cache.dir
