@@ -7,7 +7,7 @@ import android.view.Choreographer;
 public class GLView extends GLSurfaceView implements Choreographer.FrameCallback {
 
     static {
-        System.loadLibrary("i2pd");
+        System.loadLibrary("native-lib");
     }
 
     private native void nativeInit();

@@ -65,7 +65,6 @@ file(GLOB LANG_SRC_FILES "${LANG_SRC_PATH}/*.cpp")
 
 set(SRC_FILES
     DaemonAndroid.cpp
-    i2pd_android.cpp
     ${IFADDRS_PATH}/ifaddrs.cpp
     ${IFADDRS_PATH}/bionic_netlink.cpp
     ${LIB_SRC_FILES}
@@ -80,8 +79,8 @@ set(SRC_FILES
     ${DAEMON_SRC_PATH}/i2pd.cpp
 )
 
-# --- Main library ---
-add_library(i2pd SHARED ${SRC_FILES})
+
+add_library(i2pd STATIC ${SRC_FILES})
 
 # Include directories
 target_include_directories(i2pd PRIVATE
@@ -104,3 +103,9 @@ target_link_libraries(i2pd
     EGL
     GLESv2
 )
+
+add_library(native-lib SHARED native-lib.cpp)
+target_include_directories(native-lib PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+target_link_libraries(native-lib i2pd)

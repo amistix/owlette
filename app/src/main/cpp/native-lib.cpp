@@ -3,6 +3,7 @@
 #include <GLES2/gl2.h>
 #include <cmath>
 #include <chrono>
+#include "ui/View.h"
 
 static GLuint program;
 static GLint posAttr;

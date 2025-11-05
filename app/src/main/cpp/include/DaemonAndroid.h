@@ -15,41 +15,42 @@ namespace i2p
 {
 namespace android
 {
-	class DaemonAndroidImpl
+	class DaemonAndroid
 	{
 	public:
 
-		DaemonAndroidImpl ();
-		~DaemonAndroidImpl ();
+		DaemonAndroid ();
+		~DaemonAndroid ();
 
-		/**
-		 * @return success
-		 */
 		bool init (int argc, char* argv[]);
 		void start ();
 		void stop ();
 		void restart ();
 
-		void setDataDir (std::string path);
-		std::string GetBase64Destination(std::string tunnelName);
+		void reloadTunnelsConfigs ();
+
+		int getTransitTunnelsCount ();
+		std::string getWebConsAddr ();
 		
+		void setLanguage (std::string language);
+		void setAcceptsTunnels (bool state);
+		void setDataDir (std::string path);
 	};
 
 	/**
 	 * returns "ok" if daemon init failed
 	 * returns errinfo if daemon initialized and started okay
 	 */
-	std::string start ();
+	// std::string start ();
 
-	void stop ();
+	// void stop ();
 
-	// set datadir received from jni
-	void SetDataDir (std::string jdataDir);
-	// get datadir
-	std::string GetDataDir (void);
-	std::string GetBase64Destination(std::string tunnelname);
-	// set webconsole language
-	void SetLanguage (std::string jlanguage);
+	// // set datadir received from jni
+	// void SetDataDir (std::string dataDir);
+	// // get datadir
+	// std::string GetDataDir (void);
+	// // set webconsole language
+	// void SetLanguage (std::string language);
 }
 }
 
