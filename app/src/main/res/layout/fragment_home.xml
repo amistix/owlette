@@ -4,25 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.EditTunnelsFragment">
-
-    <RelativeLayout
-        android:id="@+id/layout_chatbox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        android:fitsSystemWindows="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <Button
-            android:id="@+id/button_send"
-            android:layout_width="80dp"
-            android:layout_height="48dp"
-            android:layout_alignParentEnd="true"
-            android:background="?attr/selectableItemBackground"
-            android:text="Home"
-            android:textColor="@color/raspberry" />
-    </RelativeLayout>
+    tools:context=".ui.ChannelFragment">
+    <android.widget.ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/contacs_scrollview"
+        android:background="@color/grey">
+        <LinearLayout
+            android:id="@+id/contacts_frame"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white">
+        </LinearLayout>
+        
+    </android.widget.ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

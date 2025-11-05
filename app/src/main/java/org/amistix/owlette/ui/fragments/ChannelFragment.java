@@ -10,9 +10,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import java.io.IOException;
 import android.os.AsyncTask;
+import android.widget.Toast;
 
-
-import org.amistix.owlette.network.TcpClient;
+import org.amistix.owlette.network.*;
 import org.amistix.owlette.i2pd.*;
 import org.amistix.owlette.ui.RecyclerViewAdapter;
 
@@ -30,6 +30,9 @@ import java.util.concurrent.*;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import org.amistix.owlette.databinding.ActivityChannelBinding;
+import org.amistix.owlette.SharedViewModel;
+import androidx.lifecycle.ViewModelProvider;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,8 +43,10 @@ import java.util.concurrent.Executors;
 public class ChannelFragment extends Fragment {
     private RecyclerViewAdapter adapter;
     private TcpClient tcpClient;
+    private TcpServer tcpServer;
     private ExecutorService bgExecutor;
     private String connectedDeviceIp;
+    private SharedViewModel sharedViewModel;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -58,7 +63,21 @@ public class ChannelFragment extends Fragment {
         // single executor reused for background tasks (no new threads per message)
         bgExecutor = Executors.newSingleThreadExecutor();
 
-        tcpClient = new TcpClient();
+        tcpClient = TcpClient.getInstance();
+        
+
+        tcpClient.startClient(10000, new TcpClient.MessageHandler() {
+            @Override
+            public void onMessage(String msg, InetAddress addr, int port) {
+                adapter.addItem("[CLIENT RESPONSE] " + msg);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                adapter.addItem("[CLIENT ERROR] " + e.getMessage());
+            }
+        });
+        Toast.makeText(getContext(), "Loaded", Toast.LENGTH_SHORT).show();
 
         buttonSend.setOnClickListener(v -> {
             String message = editMessage.getText().toString();
@@ -69,7 +88,7 @@ public class ChannelFragment extends Fragment {
 
             bgExecutor.submit(() -> {
                 try {
-                    tcpClient.sendFromClient(message);
+                    tcpClient.sendFromClient(tcpClient.getClientPort(), tcpClient.getDestinationClientPort(), message);
                 } catch (Exception e) {
                     // log or handle
                 }
@@ -83,24 +102,15 @@ public class ChannelFragment extends Fragment {
         });
 
         // Start server in background to avoid blocking UI
-        bgExecutor.submit(() -> {
-            if (!tcpClient.isServerRunning()) {
-                tcpClient.startServer(8080, new TcpClient.MessageHandler() {
-                    @Override
-                    public void onMessage(String message, InetAddress addr, int port) {
-                        if (message.isEmpty()) return;
-                        if (isAdded()) {
-                            requireActivity().runOnUiThread(() -> {
-                                adapter.addItem(message);
-                                recyclerView.scrollToPosition(adapter.getItemCount() - 1);
-                            });
-                        }
-                    }
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
-                    @Override
-                    public void onError(Exception e) {
-                        // handle error (post to UI if needed)
-                    }
+        // Observe LiveData for new messages
+        sharedViewModel.getMessageLiveData().observe(getViewLifecycleOwner(), (messageObject) -> {
+            if (messageObject.message.isEmpty()) return;
+            if (isAdded() ) {
+                requireActivity().runOnUiThread(() -> {
+                    adapter.addItem(messageObject.message);
+                    recyclerView.scrollToPosition(adapter.getItemCount() - 1);
                 });
             }
         });
@@ -110,22 +120,6 @@ public class ChannelFragment extends Fragment {
     private void switchCommands(String message) {
         String[] words = message.split("\\s+");
         switch (words[0]) {
-            case "/connect":
-                connectedDeviceIp = words[1];
-                adapter.addItem("Device " + connectedDeviceIp + " was added!");
-                tcpClient.startClient(connectedDeviceIp, Integer.valueOf(words[2]), 10000, new TcpClient.MessageHandler() {
-                    @Override
-                    public void onMessage(String msg, InetAddress addr, int port) {
-                        return;
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        adapter.addItem("[CLIENT ERROR] " + e.getMessage());
-                    }
-                });
-                break;
-
             case "/showwebpage":
                 adapter.addItem(I2PD_JNI.getWebConsAddr());
                 break;
