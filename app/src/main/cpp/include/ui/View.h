@@ -14,11 +14,12 @@ namespace ui
         void setColor(float r, float g, float b, float a);
         void setSize(int width, int height);
         void setPosition(int x, int y);
+
         void setViewport(int w, int h);
         std::pair<int,int> getViewport();
-        void addChild(View* childView);
-        void draw();
-        void destroy();
+        
+        virtual void draw();
+        virtual void destroy();
 
         void onTouchDown(float x, float y);
         void onTouchMove(float x, float y);
@@ -31,7 +32,11 @@ namespace ui
         View* hitTest(float x, float y);
         bool contains(float x, float y);
 
+        float getX();
+        float getY();
+
         View* getParent();
+        void addChild(View* childView);
         std::vector<View*>& getChildren();
 
     protected:

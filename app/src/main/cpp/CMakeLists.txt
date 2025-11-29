@@ -104,7 +104,12 @@ target_link_libraries(i2pd
     GLESv2
 )
 
-add_library(native-lib SHARED native-lib.cpp ui/View.cpp "input/Dispatcher.cpp")
+add_library(native-lib SHARED 
+    native-lib.cpp 
+    ui/View.cpp 
+    "input/Dispatcher.cpp"
+    ui/ScrollView.cpp
+)
 target_include_directories(native-lib PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )

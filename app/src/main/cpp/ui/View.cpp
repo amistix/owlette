@@ -54,6 +54,9 @@ namespace ui
 
     View::~View() {}
 
+    float View::getX(){return _x;}
+    float View::getY(){return _y;}
+
     View* View::getParent()
     {
         return _parent;
