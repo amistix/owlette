@@ -144,23 +144,27 @@ namespace ui
         for (View *child : _children)
         {
             child->destroy();
+            delete child;
         }
-        delete this;
+        _children.clear();
     }
 
     void View::onTouchDown(float x, float y){
-        if (_onTouchDownFunc) _onTouchDownFunc();
+        if (_onTouchDownFunc) _onTouchDownFunc(x, y);
     };
     void View::onTouchMove(float x, float y){
-        if (_onTouchMoveFunc) _onTouchMoveFunc();
+        if (_onTouchMoveFunc) _onTouchMoveFunc(x, y);
     };
     void View::onTouchUp(float x, float y){
-        if (_onTouchUpFunc) _onTouchUpFunc();
+        if (_onTouchUpFunc) _onTouchUpFunc(x, y);
     };
 
-    void View::setOnTouchDownListener(std::function<void()> f){ _onTouchDownFunc = f;}
-    void View::setOnTouchUpListener(std::function<void()> f){ _onTouchUpFunc = f;}
-    void View::setOnTouchMoveListener(std::function<void()> f){ _onTouchMoveFunc = f;}
+    void View::setOnTouchDownListener(std::function<void(float, float)> f)
+    { _onTouchDownFunc = f;}
+    void View::setOnTouchUpListener(std::function<void(float, float)> f)
+    { _onTouchUpFunc = f;}
+    void View::setOnTouchMoveListener(std::function<void(float, float)> f)
+    { _onTouchMoveFunc = f;}
 
     View* View::hitTest(float x, float y) {
         for (auto it = _children.rbegin(); it != _children.rend(); ++it) {

@@ -24,9 +24,9 @@ namespace ui
         void onTouchMove(float x, float y);
         void onTouchUp(float x, float y);
 
-        void setOnTouchUpListener(std::function<void()> f);
-        void setOnTouchDownListener(std::function<void()> f);
-        void setOnTouchMoveListener(std::function<void()> f);
+        void setOnTouchUpListener(std::function<void(float, float)> f);
+        void setOnTouchDownListener(std::function<void(float, float)> f);
+        void setOnTouchMoveListener(std::function<void(float, float)> f);
 
         View* hitTest(float x, float y);
         bool contains(float x, float y);
@@ -39,7 +39,8 @@ namespace ui
         int _y, _x;
         float _r, _g, _b, _a;
 
-        std::function<void()> _onTouchDownFunc, _onTouchUpFunc, _onTouchMoveFunc;
+        std::function<void(float, float)> _onTouchDownFunc,
+            _onTouchUpFunc, _onTouchMoveFunc;
         
         View* _parent;
         std::vector<View*> _children;
