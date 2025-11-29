@@ -1,53 +1,6 @@
 #include "ui/View.h"
 #include <GLES2/gl2.h>
 
-static GLuint rectProgram = 0;
-static GLint posLoc = -1;
-static GLint colorLoc = -1;
-static GLint sizeLoc = -1;
-static GLint offsetLoc = -1;
-
-using namespace ui;
-static void initRectShader()
-{
-    if (rectProgram != 0) {
-        glDeleteProgram(rectProgram);
-        rectProgram = 0;
-    }
-
-    const char* vsSrc =
-        "attribute vec2 aPos;"
-        "uniform vec2 uOffset;"
-        "uniform vec2 uSize;"
-        "void main() {"
-        "   vec2 pos = (aPos * uSize) + uOffset;"
-        "   gl_Position = vec4(pos, 0.0, 1.0);"
-        "}";
-
-    const char* fsSrc =
-        "precision mediump float;"
-        "uniform vec4 uColor;"
-        "void main() { gl_FragColor = uColor; }";
-
-    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs, 1, &vsSrc, nullptr);
-    glCompileShader(vs);
-
-    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs, 1, &fsSrc, nullptr);
-    glCompileShader(fs);
-
-    rectProgram = glCreateProgram();
-    glAttachShader(rectProgram, vs);
-    glAttachShader(rectProgram, fs);
-    glLinkProgram(rectProgram);
-
-    posLoc    = glGetAttribLocation(rectProgram, "aPos");
-    offsetLoc = glGetUniformLocation(rectProgram, "uOffset");
-    sizeLoc   = glGetUniformLocation(rectProgram, "uSize");
-    colorLoc  = glGetUniformLocation(rectProgram, "uColor");
-}
-
 namespace ui
 {
     View::View() {}
@@ -102,8 +55,7 @@ namespace ui
 
     void View::drawSelf()
     {
-        initRectShader();
-        glUseProgram(rectProgram);
+        glUseProgram(getRectProgram());
 
         auto [vw, vh] = getViewport();
 
@@ -121,16 +73,17 @@ namespace ui
             1.0f, 1.0f
         };
 
-        glUniform2f(offsetLoc, xNorm, yNorm);
-        glUniform2f(sizeLoc,   wNorm, hNorm);
-        glUniform4f(colorLoc,  _r, _g, _b, _a);
+        glUniform2f(getOffsetLoc(), xNorm, yNorm);
+        glUniform2f(getSizeLoc(),   wNorm, hNorm);
+        glUniform4f(getColorLoc(),  _r, _g, _b, _a);
+        glUniform1f(getScrollLoc(), _scrollApplied);
 
-        glEnableVertexAttribArray(posLoc);
-        glVertexAttribPointer(posLoc, 2, GL_FLOAT, GL_FALSE, 0, verts);
+        glEnableVertexAttribArray(getPosLoc());
+        glVertexAttribPointer(getPosLoc(), 2, GL_FLOAT, GL_FALSE, 0, verts);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-        glDisableVertexAttribArray(posLoc);
+        glDisableVertexAttribArray(getPosLoc());
     }
 
     void View::draw()

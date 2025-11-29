@@ -16,6 +16,9 @@ Java_org_amistix_owlette_GLView_nativeInit(JNIEnv*, jclass) {
     glGetIntegerv( GL_VIEWPORT, m_viewport );
     width = m_viewport[2];
     height = m_viewport[3];
+
+    destroyGLResources();
+    initRectShader();
     
     if (rootView) return;
 

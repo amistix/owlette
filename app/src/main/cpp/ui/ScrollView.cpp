@@ -37,24 +37,26 @@ namespace ui {
 
     void ScrollView::draw() 
     {
-        // 1) Clip using glScissor
         auto[vw, vh] = getViewport();
 
         int px = _x;
-        int py = vh - (_y + _height);      // Y is inverted for glScissor
+        int py = vh - (_y + _height);     
         glEnable(GL_SCISSOR_TEST);
         glScissor(px, py, _width, _height);
 
-        // 2) Draw background (normal View draw)
         drawSelf();
 
-        // 3) Draw children shifted by scrollY
-        for (View *child : _children)
-        {
-            int oldY = child->getY();
-            child->setPosition(child->getX(), oldY + (int)_scrollY);
+        // for (View *child : _children)
+        // {
+        //     int oldY = child->getY();
+        //     child->setPosition(child->getX(), oldY + (int)_scrollY);
+        //     child->draw();
+        //     child->setPosition(child->getX(), oldY);
+        // }
+        for (View* child : _children) {
+            child->_scrollApplied = _scrollY / (float)vh * -2.0f;
             child->draw();
-            child->setPosition(child->getX(), oldY);
+            child->_scrollApplied = 0.0f;
         }
 
         glDisable(GL_SCISSOR_TEST);

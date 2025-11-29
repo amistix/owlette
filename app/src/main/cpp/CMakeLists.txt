@@ -109,6 +109,7 @@ add_library(native-lib SHARED
     ui/View.cpp 
     "input/Dispatcher.cpp"
     ui/ScrollView.cpp
+    ui/Renderer.cpp
 )
 target_include_directories(native-lib PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include

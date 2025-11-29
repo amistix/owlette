@@ -1,4 +1,5 @@
 #pragma once 
+#include "ui/Renderer.h"
 #include <vector>
 #include <functional>
 #include <utility> 
@@ -10,6 +11,8 @@ namespace ui
     public:
         View ();
         ~View ();
+
+        float _scrollApplied = 0.0f;
 
         void setColor(float r, float g, float b, float a);
         void setSize(int width, int height);
