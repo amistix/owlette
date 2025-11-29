@@ -147,4 +147,35 @@ namespace ui
         }
         delete this;
     }
+
+    void View::onTouchDown(float x, float y){
+        if (_onTouchDownFunc) _onTouchDownFunc();
+    };
+    void View::onTouchMove(float x, float y){
+        if (_onTouchMoveFunc) _onTouchMoveFunc();
+    };
+    void View::onTouchUp(float x, float y){
+        if (_onTouchUpFunc) _onTouchUpFunc();
+    };
+
+    void View::setOnTouchDownListener(std::function<void()> f){ _onTouchDownFunc = f;}
+    void View::setOnTouchUpListener(std::function<void()> f){ _onTouchUpFunc = f;}
+    void View::setOnTouchMoveListener(std::function<void()> f){ _onTouchMoveFunc = f;}
+
+    View* View::hitTest(float x, float y) {
+        for (auto it = _children.rbegin(); it != _children.rend(); ++it) {
+            View* child = *it;
+            if (child->contains(x, y)) {
+                View* deeper = child->hitTest(x, y);
+                return deeper ? deeper : child;
+            }
+        }
+
+        return contains(x, y) ? this : nullptr;
+    }
+
+    bool View::contains(float x, float y) {
+        return x >= _x && x <= _x + _width &&
+            y >= _y && y <= _y + _height;
+    }
 }

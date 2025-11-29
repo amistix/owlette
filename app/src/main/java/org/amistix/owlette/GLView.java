@@ -3,6 +3,8 @@ package org.amistix.owlette;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.view.Choreographer;
+import android.view.MotionEvent;
+
 
 public class GLView extends GLSurfaceView implements Choreographer.FrameCallback {
 
@@ -14,6 +16,7 @@ public class GLView extends GLSurfaceView implements Choreographer.FrameCallback
     private native void nativeResize(int width, int height);
     private native void nativeDraw();
     private native void nativeDestroy();
+    private native void nativeTouch(int action, float x, float y);
 
     public GLView(Context context) {
         super(context);
@@ -54,6 +57,16 @@ public class GLView extends GLSurfaceView implements Choreographer.FrameCallback
     public void doFrame(long frameTimeNanos) {
         requestRender();
         Choreographer.getInstance().postFrameCallback(this);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int action = event.getActionMasked();
+        float x = event.getX();
+        float y = event.getY();
+
+        nativeTouch(action, x, y);
+        return true;
     }
 
     public void release() {
