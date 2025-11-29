@@ -17,11 +17,12 @@ namespace ui
         std::pair<int,int> getViewport();
         void addChild(View* childView);
         void draw();
+        void destroy();
 
         View* getParent();
         std::vector<View*>& getChildren();
 
-    private:
+    protected:
         int _width, _height;
         int _y, _x;
         float _r, _g, _b, _a;
@@ -31,6 +32,6 @@ namespace ui
 
         int _viewportW, _viewportH;
 
-        void drawSelf();
+        virtual void drawSelf() ;
     };
 }

@@ -13,6 +13,7 @@ public class GLView extends GLSurfaceView implements Choreographer.FrameCallback
     private native void nativeInit();
     private native void nativeResize(int width, int height);
     private native void nativeDraw();
+    private native void nativeDestroy();
 
     public GLView(Context context) {
         super(context);
@@ -53,5 +54,9 @@ public class GLView extends GLSurfaceView implements Choreographer.FrameCallback
     public void doFrame(long frameTimeNanos) {
         requestRender();
         Choreographer.getInstance().postFrameCallback(this);
+    }
+
+    public void release() {
+        nativeDestroy();
     }
 } 

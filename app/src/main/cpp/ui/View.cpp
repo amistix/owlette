@@ -138,4 +138,13 @@ namespace ui
             child->draw();
         }
     }
+
+    void View::destroy()
+    {
+        for (View *child : _children)
+        {
+            child->destroy();
+        }
+        delete this;
+    }
 }
