@@ -1,6 +1,6 @@
 #pragma once 
-#include <GLES2/gl2.h>
 #include <vector>
+#include <utility> 
 
 namespace ui 
 {
@@ -10,16 +10,27 @@ namespace ui
         View ();
         ~View ();
 
+        void setColor(float r, float g, float b, float a);
         void setSize(int width, int height);
+        void setPosition(int x, int y);
+        void setViewport(int w, int h);
+        std::pair<int,int> getViewport();
         void addChild(View* childView);
+        void draw();
 
         View* getParent();
-        std::vector<View*> getChildren();
+        std::vector<View*>& getChildren();
 
     private:
-        int _width;
-        int _height;
+        int _width, _height;
+        int _y, _x;
+        float _r, _g, _b, _a;
+        
         View* _parent;
         std::vector<View*> _children;
+
+        int _viewportW, _viewportH;
+
+        void drawSelf();
     };
 }
