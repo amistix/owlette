@@ -50,7 +50,7 @@ namespace ui
         std::function<void(float, float)> _onTouchDownFunc,
             _onTouchUpFunc, _onTouchMoveFunc;
         
-        View* _parent;
+        View* _parent = nullptr;
         std::vector<View*> _children;
 
         int _viewportW, _viewportH;

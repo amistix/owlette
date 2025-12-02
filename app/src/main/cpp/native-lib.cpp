@@ -23,37 +23,23 @@ Java_org_amistix_owlette_GLView_nativeInit(JNIEnv*, jclass) {
     if (rootView) return;
 
     rootView = new ui::View();
-    ui::View* titleBar = new ui::View();
     input::setRoot(rootView);
-    
-    titleBar->setPosition(0, 0);
-    titleBar->setViewport(width, height);
-    titleBar->setSize(width, height/12);
-    titleBar->setColor(0.87f, 0.1f, 0.3f, 1.0f);
-
-    titleBar->setOnTouchDownListener([=](float x, float y){
-        titleBar->setColor(0.85f, 0.08f, 0.28f, 1.0f);
-    });
-    titleBar->setOnTouchUpListener([=](float x, float y){
-        titleBar->setColor(0.87f, 0.1f, 0.3f, 1.0f);
-    });
 
     rootView->setViewport(width, height);
     rootView->setPosition(0, 0);
     rootView->setColor(0.9f, 0.9f, 0.9f, 1.0f);
     rootView->setSize(width, height);
-    rootView->addChild(titleBar);
 
     ui::ScrollView* content = new ui::ScrollView();
-    content->setPosition(0, height/12);
-    content->setSize(width, height - height/12);
+    content->setPosition(0, 0);
+    content->setSize(width, height);
     content->setColor(0.95f, 0.95f, 0.95f, 1.0f);
     content->setContainerHeight(3000.0f);
 
     for (int i = 0; i < 20; i++) {
         ui::View* item = new ui::View();
         item->setSize(width, 150);
-        item->setPosition(0, i * 150 + height/12);
+        item->setPosition(0, i * 150);
         item->setColor(0.2f, 0.2f + i*0.02f, 0.35f, 1.0f);
 
         item->setOnTouchDownListener([=](float x, float y){

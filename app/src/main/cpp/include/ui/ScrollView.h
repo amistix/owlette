@@ -19,12 +19,12 @@ namespace ui
         void setContainerHeight(float height);
 
     private:
-        float _scrollY;
-        float _deltaY;
-        float _lastTouchY;
+        float _scrollY = 0;
+        float _deltaY = 0;
+        float _lastTouchY = 0;
 
-        float _containerHeight;
+        float _containerHeight = 0;
 
-        bool _dragging;
+        bool _dragging = false;
     };
 }
