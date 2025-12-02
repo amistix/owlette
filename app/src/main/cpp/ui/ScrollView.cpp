@@ -19,15 +19,15 @@ namespace ui {
     void ScrollView::scroll(float x, float y) {
         if (!_dragging) return;
 
-        float _deltaY = y - _lastTouchY;
+        float deltaY = y - _lastTouchY;
         _lastTouchY = y;
 
-        _scrollY += _deltaY;
+        _scrollY += deltaY;
+        _velocityY = deltaY;  // record current scroll speed
 
         // clamp scroll range
         float minScroll = _height - _containerHeight;   // bottom
-        float maxScroll = 0.0f;                      // top
-
+        float maxScroll = 0.0f;                         // top
         _scrollY = std::clamp(_scrollY, minScroll, maxScroll);
     }
 
@@ -37,6 +37,23 @@ namespace ui {
 
     void ScrollView::draw() 
     {
+        if (!_dragging && std::abs(_velocityY) > 0.1f) {
+            _scrollY += _velocityY;
+
+            // clamp scroll range
+            float minScroll = _height - _containerHeight;
+            float maxScroll = 0.0f;
+
+            if (_scrollY < minScroll) {
+                _scrollY = minScroll;
+                _velocityY = 0;
+            } else if (_scrollY > maxScroll) {
+                _scrollY = maxScroll;
+                _velocityY = 0;
+            } else {
+                _velocityY *= _friction;  // apply friction
+            }
+        }
         auto[vw, vh] = getViewport();
 
         int px = _x;
@@ -46,13 +63,6 @@ namespace ui {
 
         drawSelf();
 
-        // for (View *child : _children)
-        // {
-        //     int oldY = child->getY();
-        //     child->setPosition(child->getX(), oldY + (int)_scrollY);
-        //     child->draw();
-        //     child->setPosition(child->getX(), oldY);
-        // }
         for (View* child : _children) {
             child->_scrollApplied = _scrollY / (float)vh * -2.0f;
             child->draw();

@@ -24,6 +24,8 @@ namespace ui
         float _lastTouchY = 0;
 
         float _containerHeight = 0;
+        float _velocityY = 0;
+        float _friction = 0.95f;
 
         bool _dragging = false;
     };
