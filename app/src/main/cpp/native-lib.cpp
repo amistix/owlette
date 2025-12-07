@@ -6,6 +6,8 @@
 #include "input/Dispatcher.h"
 #include "ui/TextView.h"
 
+#include "ui/FontRenderer.h"
+
 #include <chrono>
 #include <cmath>
 
@@ -28,6 +30,8 @@ Java_org_amistix_owlette_GLView_nativeInit(JNIEnv*, jclass) {
 
     destroyGLResources();
     initRectShader();
+    initFontRenderer();
+    uploadFontTexture(); 
     
     if (rootView) return;
 

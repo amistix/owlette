@@ -90,11 +90,7 @@ static GLuint createShaderProgram() {
 }
 
 void initFontRenderer() {
-    if (g_fontShader != 0) return; // Already initialized
-    
-    LOGD("Initializing font renderer");
-    
-    // Create shader program
+    cleanupFontRenderer();  
     g_fontShader = createShaderProgram();
     if (g_fontShader == 0) {
         LOGE("Failed to create shader program");
@@ -138,7 +134,10 @@ void cleanupFontRenderer() {
 }
 
 void uploadFontTexture() {
-    if (g_fontTexture != 0) return; // Already uploaded
+    if (g_fontTexture != 0) {
+        glDeleteTextures(1, &g_fontTexture);
+        g_fontTexture = 0;
+    }
     
     if (!g_fontPixels) {
         LOGE("❌ Font pixels not loaded! g_fontPixels is NULL");
