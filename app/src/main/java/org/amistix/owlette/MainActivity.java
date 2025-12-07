@@ -13,6 +13,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         glView = new GLView(this);
+        FontRenderer.initFont(64.0f);
         setContentView(glView);
     }
 

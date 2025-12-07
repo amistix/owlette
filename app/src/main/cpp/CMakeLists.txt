@@ -107,9 +107,13 @@ target_link_libraries(i2pd
 add_library(native-lib SHARED 
     native-lib.cpp 
     ui/View.cpp 
+    ui/TextView.cpp
     "input/Dispatcher.cpp"
     ui/ScrollView.cpp
     ui/Renderer.cpp
+    ui/FontRenderer.cpp
+    ui/Font_JNI.cpp
+    ui/FontGlobals.cpp
 )
 target_include_directories(native-lib PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
