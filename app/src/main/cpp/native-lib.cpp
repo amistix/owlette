@@ -5,25 +5,25 @@
 #include "ui/ScrollView.h"
 #include "input/Dispatcher.h"
 #include "ui/TextView.h"
+#include <android/log.h>
+// #include "ui/EditTextView.h"
 
+// #include "input/InputManager.h"
 #include "ui/FontRenderer.h"
-
-#include <chrono>
-#include <cmath>
 
 static GLint width, height;
 static GLint m_viewport[4];
 
+static JavaVM* g_vm;
+
 static ui::View* rootView = nullptr;
-static ui::TextView* content = nullptr;
-
-static std::chrono::time_point<std::chrono::steady_clock> start_time;
-static std::chrono::time_point<std::chrono::steady_clock> stop_time;
-
-static bool is_stopped = false;
+void openKeyboard();
 
 extern "C" JNIEXPORT void JNICALL
-Java_org_amistix_owlette_GLView_nativeInit(JNIEnv*, jclass) {
+Java_org_amistix_owlette_GLView_nativeInit(JNIEnv* env, jclass) {
+
+    env->GetJavaVM(&g_vm);
+
     glGetIntegerv( GL_VIEWPORT, m_viewport );
     width = m_viewport[2];
     height = m_viewport[3];
@@ -38,35 +38,67 @@ Java_org_amistix_owlette_GLView_nativeInit(JNIEnv*, jclass) {
     rootView = new ui::View();
     input::setRoot(rootView);
 
-    start_time = std::chrono::steady_clock::now();
-
     rootView->setViewport(width, height);
     rootView->setPosition(0, 0);
     rootView->setColor(0.9f, 0.9f, 0.9f, 1.0f);
     rootView->setSize(width, height);
 
-    content = new ui::TextView();
-    content->setPosition(width / 8, height / 2 - 100);
-    content->setSize(6 * width / 8, 200);
-    content->setText("Hello, Owlette!");
-    content->setColor(0.5f, 0.5f, 0.5f, 1.0f);
-    content->setColorText(0.2f, 0.2f, 0.8f, 1.0f);
+    ui::ScrollView* scrollView = new ui::ScrollView();
+    scrollView->setPosition(0, 0);
+    scrollView->setSize(width, height);
+    scrollView->setColor(0.8f, 0.8f, 0.8f, 0.0f);
+    scrollView->setContainerHeight(4210);
 
-    rootView->addChild(content);
+    for (int i=0; i<20; i++)
+    {
 
-    content->setOnTouchDownListener([=](float x, float y){
-        rootView->setColor(0.7f, 0.7f, 0.7f, 1.0f);
-        is_stopped = true;
-        stop_time = std::chrono::steady_clock::now();
-    });
+        ui::View* placeholder = new ui::View();
+        placeholder->setPosition(10, 210 * i + 10);
+        placeholder->setSize(width - 20, 200);
+        placeholder->setColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-    content->setOnTouchUpListener([=](float x, float y){
-        rootView->setColor(0.9f, 0.9f, 0.9f, 1.0f);
-        is_stopped = false;
-        std::chrono::duration<long double> stop_duration_in_seconds = std::chrono::steady_clock::now() - stop_time;
-        std::chrono::seconds seconds_offset = std::chrono::duration_cast<std::chrono::seconds>(stop_duration_in_seconds);
-        start_time += seconds_offset;
-    });
+        ui::TextView* content = new ui::TextView();
+        content->setPosition(50, 50);
+        content->setSize(400, 200);
+        content->setText("Hello, Owlette!");
+        content->setColor(0.0f, 0.0f, 0.0f, 0.0f);
+        content->setColorText(0.0f, 0.0f, 0.0f, 1.0f);
+
+        content->setOnTouchDownListener([=](float x, float y){
+            // openKeyboard();
+            content->getParent()->onTouchDown(x, y);
+        });
+
+        content->setOnTouchMoveListener([=](float x, float y){
+            content->getParent()->onTouchMove(x, y);
+        });
+
+        content->setOnTouchUpListener([=](float x, float y){
+            // openKeyboard();
+            content->getParent()->onTouchUp(x, y);
+        });
+
+        placeholder->addChild(content);
+        scrollView->addChild(placeholder);
+
+        content->getParent()->setOnTouchDownListener([=](float x, float y){
+            // openKeyboard();
+            scrollView->focus(x, y);
+            content->getParent()->setColor(0.7f, 0.7f, 0.7f, 1.0f);
+        });
+
+        content->getParent()->setOnTouchMoveListener([=](float x, float y){
+            scrollView->scroll(x, y);
+        });
+
+        content->getParent()->setOnTouchUpListener([=](float x, float y){
+            // openKeyboard();
+            scrollView->unfocus(x, y);
+            content->getParent()->setColor(0.5f, 0.5f, 0.5f, 1.0f);
+        });
+    }
+
+    rootView->addChild(scrollView);
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -76,7 +108,6 @@ Java_org_amistix_owlette_GLView_nativeResize(JNIEnv*, jclass, jint width, jint h
     {
         rootView->setSize(width, height);
         rootView->setViewport(width, height);
-
     }
 }
 
@@ -85,18 +116,6 @@ Java_org_amistix_owlette_GLView_nativeDraw(JNIEnv*, jclass) {
     if (rootView) 
     {
         rootView->draw();
-
-        std::chrono::duration<long double> duration_in_seconds = std::chrono::steady_clock::now() - start_time;
-        content->setColor(0.5f + 0.5f * std::sin(duration_in_seconds.count()), 
-                          0.5f + 0.5f * std::sin(duration_in_seconds.count() + 2.0f), 
-                          0.5f + 0.5f * std::sin(duration_in_seconds.count() + 4.0f), 
-                          1.0f);
-        content->setColorText(0.5f + 0.1f * std::sin(duration_in_seconds.count()), 
-                             0.1f + 0.5f * std::sin(duration_in_seconds.count()), 
-                             0.3f + 0.2f * std::sin(duration_in_seconds.count()), 
-                             1.0f);
-        if (is_stopped) return;
-         content->setPosition(width / 8, height / 2 -100 + std::sin(duration_in_seconds.count()) * 400);
     }
 }
 
@@ -111,4 +130,25 @@ extern "C" JNIEXPORT void JNICALL
 Java_org_amistix_owlette_GLView_nativeTouch(JNIEnv*, jclass, jint action, jfloat x, jfloat y)
 {
     input::handleTouch(action, x, y);
+}
+
+JNIEnv* getEnv() {
+    JNIEnv* env = nullptr;
+
+    // Check if the thread already has JNIEnv
+    jint result = g_vm->GetEnv((void**)&env, JNI_VERSION_1_6);
+
+    if (result == JNI_EDETACHED) {
+        // Attach current thread
+        g_vm->AttachCurrentThread(&env, nullptr);
+    }
+
+    return env;
+}
+
+void openKeyboard() {
+    JNIEnv* env = getEnv();
+    // jclass cls = env->FindClass("org/amistix/owlette/MainActivity");
+    // jmethodID mid = env->GetStaticMethodID(cls, "showKeyboardFromNative", "()V");
+    // env->CallStaticVoidMethod(cls, mid);
 }

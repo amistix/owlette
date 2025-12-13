@@ -5,7 +5,6 @@ static GLint posLoc = -1;
 static GLint colorLoc = -1;
 static GLint sizeLoc = -1;
 static GLint offsetLoc = -1;
-static GLint scrollLoc = -1;
 
 void initRectShader()
 {
@@ -14,9 +13,8 @@ void initRectShader()
     const char* vsSrc = "attribute vec2 aPos;"
         "uniform vec2 uOffset;"
         "uniform vec2 uSize;"
-        "uniform float uScroll;"
         "void main() {"
-        " vec2 pos = (aPos * uSize) + vec2(uOffset.x, uOffset.y + uScroll);"
+        " vec2 pos = (aPos * uSize) + uOffset;"
         " gl_Position = vec4(pos, 0.0, 1.0);"
         "}";
 
@@ -41,7 +39,6 @@ void initRectShader()
     offsetLoc = glGetUniformLocation(rectProgram, "uOffset");
     sizeLoc   = glGetUniformLocation(rectProgram, "uSize");
     colorLoc  = glGetUniformLocation(rectProgram, "uColor");
-    scrollLoc = glGetUniformLocation(rectProgram, "uScroll");
 
     glDeleteShader(vs); // optional cleanup
     glDeleteShader(fs);
@@ -52,7 +49,7 @@ void destroyGLResources()
     if (rectProgram != 0) {
         glDeleteProgram(rectProgram);
         rectProgram = 0;
-        posLoc = colorLoc = sizeLoc = offsetLoc = scrollLoc = -1;
+        posLoc = colorLoc = sizeLoc = offsetLoc = -1;
     }
 }
 
@@ -62,4 +59,3 @@ GLint getPosLoc() { return posLoc; }
 GLint getOffsetLoc() { return offsetLoc; }
 GLint getSizeLoc() { return sizeLoc; }
 GLint getColorLoc() { return colorLoc; }
-GLint getScrollLoc() { return scrollLoc; }

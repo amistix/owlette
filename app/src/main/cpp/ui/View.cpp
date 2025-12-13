@@ -53,15 +53,32 @@ namespace ui
         _viewportW = w; _viewportH = h;
     }
 
+    std::pair<int,int> View::getAbsolutePosition(int ownerX, int ownerY)
+    {
+        int absX = ownerX + _x;
+        int absY = ownerY + _y;
+
+        if (_parent)
+        {
+            return _parent->getAbsolutePosition(absX, absY);
+        }
+        else
+        {
+            return {absX, absY};
+        }
+    }
+
     void View::drawSelf()
     {
         glUseProgram(getRectProgram());
 
         auto [vw, vh] = getViewport();
 
+        auto [absX, absY] = getAbsolutePosition();
+
         // Convert pixel coordinates → OpenGL (-1 to 1)
-        float xNorm = ( (float)_x      / vw ) * 2.0f - 1.0f;
-        float yNorm = ( (float)_y      / vh ) * -2.0f + 1.0f;
+        float xNorm = ( (float)absX    / vw ) * 2.0f - 1.0f;
+        float yNorm = ( (float)absY    / vh ) * -2.0f + 1.0f;
         float wNorm = ( (float)_width  / vw ) * 2.0f;
         float hNorm = ( (float)_height / vh ) * -2.0f;
 
@@ -76,7 +93,6 @@ namespace ui
         glUniform2f(getOffsetLoc(), xNorm, yNorm);
         glUniform2f(getSizeLoc(),   wNorm, hNorm);
         glUniform4f(getColorLoc(),  _r, _g, _b, _a);
-        glUniform1f(getScrollLoc(), _scrollApplied);
 
         glEnableVertexAttribArray(getPosLoc());
         glVertexAttribPointer(getPosLoc(), 2, GL_FLOAT, GL_FALSE, 0, verts);
@@ -135,7 +151,9 @@ namespace ui
     }
 
     bool View::contains(float x, float y) {
-        return x >= _x && x <= _x + _width &&
-            y >= _y && y <= _y + _height;
+        auto [absX, absY] = getAbsolutePosition();
+        return x >= absX && x <= absX + _width &&
+            y >= absY && y <= absY + _height;
     }
+    
 }

@@ -1,5 +1,6 @@
 #include "ui/ScrollView.h"
 #include <algorithm>
+#include <cmath>
 
 namespace ui {
 
@@ -14,6 +15,7 @@ namespace ui {
     void ScrollView::focus(float x, float y) {
         _dragging = true;
         _lastTouchY = y;
+        _velocityY = 0;  // Reset velocity when starting drag
     }
 
     void ScrollView::scroll(float x, float y) {
@@ -23,11 +25,13 @@ namespace ui {
         _lastTouchY = y;
 
         _scrollY += deltaY;
-        _velocityY = deltaY;  // record current scroll speed
+        
+        // Smooth velocity: blend current delta with previous velocity
+        _velocityY = _velocityY * 0.7f + deltaY * 0.3f;
 
         // clamp scroll range
-        float minScroll = _height - _containerHeight;   // bottom
-        float maxScroll = 0.0f;                         // top
+        float minScroll = _height - _containerHeight;
+        float maxScroll = 0.0f;
         _scrollY = std::clamp(_scrollY, minScroll, maxScroll);
     }
 
@@ -37,7 +41,7 @@ namespace ui {
 
     void ScrollView::draw() 
     {
-        if (!_dragging && std::abs(_velocityY) > 0.1f) {
+        if (!_dragging && std::abs(_velocityY) > 0.5f) {  // Higher threshold
             _scrollY += _velocityY;
 
             // clamp scroll range
@@ -51,9 +55,12 @@ namespace ui {
                 _scrollY = maxScroll;
                 _velocityY = 0;
             } else {
-                _velocityY *= _friction;  // apply friction
+                _velocityY *= 0.95f;  // Stronger friction (was 0.9)
             }
+        } else if (!_dragging) {
+            _velocityY = 0;  // Stop completely when velocity is too low
         }
+        
         auto[vw, vh] = getViewport();
 
         int px = _x;
@@ -64,12 +71,26 @@ namespace ui {
         drawSelf();
 
         for (View* child : _children) {
-            child->_scrollApplied = _scrollY / (float)vh * -2.0f;
+            int old_y = child->getY();
+            child->setPosition(child->getX(), old_y + _scrollY);
             child->draw();
-            child->_scrollApplied = 0.0f;
+            child->setPosition(child->getX(), old_y);
         }
 
         glDisable(GL_SCISSOR_TEST);
     }
 
+    View* ScrollView::hitTest(float x, float y) {
+        float adjustedY = y - _scrollY;
+        
+        for (auto it = _children.rbegin(); it != _children.rend(); ++it) {
+            View* child = *it;
+            
+            if (child->contains(x, y - _scrollY)) {
+                View* deeper = child->hitTest(x, adjustedY);
+                return deeper ? deeper : child;
+            }
+        }
+        return contains(x, y) ? this : nullptr;
+    }
 }

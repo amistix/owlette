@@ -14,10 +14,9 @@ namespace ui
 
     void TextView::drawSelf() 
     {
-        int px = _x;
-        int py = _y;
+        auto [absX, absY] = getAbsolutePosition();
 
         View::drawSelf();
-        drawText(_text, px, py, _text_r, _text_g, _text_b, _text_a, 64.0f);
+        drawText(_text, absX, absY, _text_r, _text_g, _text_b, _text_a, 64.0f);
     }
 }

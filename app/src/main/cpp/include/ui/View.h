@@ -12,8 +12,6 @@ namespace ui
         View ();
         ~View ();
 
-        float _scrollApplied = 0.0f;
-
         void setColor(float r, float g, float b, float a);
         void setSize(int width, int height);
         void setPosition(int x, int y);
@@ -23,6 +21,9 @@ namespace ui
         
         virtual void draw();
         virtual void destroy();
+        virtual void drawSelf();
+
+        std::pair<int,int> getAbsolutePosition(int ownerX = 0, int ownerY = 0);
 
         void onTouchDown(float x, float y);
         void onTouchMove(float x, float y);
@@ -32,7 +33,8 @@ namespace ui
         void setOnTouchDownListener(std::function<void(float, float)> f);
         void setOnTouchMoveListener(std::function<void(float, float)> f);
 
-        View* hitTest(float x, float y);
+        virtual View* hitTest(float x, float y);
+
         bool contains(float x, float y);
 
         float getX();
@@ -55,6 +57,5 @@ namespace ui
 
         int _viewportW, _viewportH;
 
-        virtual void drawSelf() ;
     };
 }

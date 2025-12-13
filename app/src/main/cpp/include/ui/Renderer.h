@@ -8,4 +8,3 @@ GLint getPosLoc();
 GLint getOffsetLoc();
 GLint getSizeLoc();
 GLint getColorLoc();
-GLint getScrollLoc();

@@ -38,7 +38,24 @@ Java_org_amistix_owlette_FontRenderer_nativeSetFontData(
     g_fontHeight = height;
 
     // --- Copy atlas pixels ---
-    g_fontPixels = (unsigned char*) env->GetDirectBufferAddress(buffer);
+    if (g_fontPixels) {
+        delete[] g_fontPixels;
+        g_fontPixels = nullptr;
+    }
+
+    // Get the size of the buffer (width * height)
+    int size = width * height; // Assuming 1 byte per pixel (e.g., grayscale font atlas)
+
+    // Allocate C++ buffer
+    g_fontPixels = new unsigned char[size];
+
+    // Copy data from Java direct buffer
+    unsigned char* src = (unsigned char*) env->GetDirectBufferAddress(buffer);
+    if (src) {
+        std::memcpy(g_fontPixels, src, size);
+    } else {
+        LOGE("Failed to get direct buffer address from Java");
+    }
 
     // --- Copy glyph X & W ---
     jsize len = env->GetArrayLength(glyphX);

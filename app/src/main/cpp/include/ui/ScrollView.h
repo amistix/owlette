@@ -15,6 +15,7 @@ namespace ui
         void scroll(float x, float y);
 
         virtual void draw() override;
+        virtual ui::View* hitTest(float x, float y) override;
 
         void setContainerHeight(float height);
 
@@ -25,7 +26,7 @@ namespace ui
 
         float _containerHeight = 0;
         float _velocityY = 0;
-        float _friction = 0.95f;
+        float _friction = 0.99f;
 
         bool _dragging = false;
     };
