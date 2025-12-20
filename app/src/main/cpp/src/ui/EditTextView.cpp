@@ -2,13 +2,8 @@
 #include "ui/FontRenderer.h"
 #include <GLES2/gl2.h>
 
-#include <android/log.h>
-
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "OWLETTE", __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "OWLETTE", __VA_ARGS__)
-
 extern JavaVM* g_vm;
-extern jobject g_activity;  // This should be defined globally, not in class
+extern jobject g_activity;
 
 namespace ui {
 
@@ -23,10 +18,7 @@ EditTextView::~EditTextView() {
 }
 
 void EditTextView::setFocused(bool focused) {
-    LOGI("EditTextView setFocused: %d", focused);
     _focused = focused;
-    _cursorBlinkTime = 0.0f;
-    _showCursor = true;
     
     if (focused) {
         _focusedInstance = this;
@@ -40,17 +32,7 @@ void EditTextView::setFocused(bool focused) {
 }
 
 void EditTextView::updateText(const std::string& text) {
-    setText(text);  // Replace text, don't append
-}
-
-void EditTextView::update(float deltaTime) {
-    if (_focused) {
-        _cursorBlinkTime += deltaTime;
-        if (_cursorBlinkTime >= 0.5f) {
-            _cursorBlinkTime = 0.0f;
-            _showCursor = !_showCursor;
-        }
-    }
+    setText(text);
 }
 
 void EditTextView::drawSelf() {
@@ -67,11 +49,9 @@ void EditTextView::drawSelf() {
 
 void EditTextView::openKeyboard() {
     if (!g_vm) {
-        LOGE("g_vm is null");
         return;
     }
     if (!g_activity) {
-        LOGE("g_activity is null");
         return;
     }
 
@@ -80,24 +60,20 @@ void EditTextView::openKeyboard() {
 
     jclass cls = env->GetObjectClass(g_activity);
     if (!cls) {
-        LOGE("Failed to get activity class");
         return;
     }
 
     jmethodID mid = env->GetMethodID(cls, "showKeyboard", "(Ljava/lang/String;)V");
     if (!mid) {
-        LOGE("showKeyboard() method NOT FOUND");
         env->ExceptionDescribe();
         env->ExceptionClear();
         return;
     }
 
-    LOGI("Calling showKeyboard()");
     jstring jText = env->NewStringUTF(_text.c_str());
     env->CallVoidMethod(g_activity, mid, jText);
 
     if (env->ExceptionCheck()) {
-        LOGE("Exception while calling showKeyboard()");
         env->ExceptionDescribe();
         env->ExceptionClear();
     }
@@ -126,4 +102,4 @@ void EditTextView::closeKeyboard() {
     }
 }
 
-} // namespace ui
+}

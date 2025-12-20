@@ -25,11 +25,8 @@ public:
     void drawSelf() override;
     
 private:
-    void drawCursor();
     static EditTextView* _focusedInstance;
     bool _focused = false;
-    float _cursorBlinkTime = 0.0f;
-    bool _showCursor = true;
 };
 
 } // namespace ui

@@ -64,7 +64,7 @@ file(GLOB LIB_CLIENT_SRC_FILES "${LIB_CLIENT_SRC_PATH}/*.cpp")
 file(GLOB LANG_SRC_FILES "${LANG_SRC_PATH}/*.cpp")
 
 set(SRC_FILES
-    DaemonAndroid.cpp
+    src/DaemonAndroid.cpp
     ${IFADDRS_PATH}/ifaddrs.cpp
     ${IFADDRS_PATH}/bionic_netlink.cpp
     ${LIB_SRC_FILES}
@@ -105,17 +105,23 @@ target_link_libraries(i2pd
 )
 
 add_library(native-lib SHARED 
-    native-lib.cpp 
-    ui/View.cpp 
-    ui/TextView.cpp
-    ui/EditTextView.cpp
-    "input/Dispatcher.cpp"
-    ui/ScrollView.cpp
-    ui/Renderer.cpp
-    ui/FontRenderer.cpp
-    ui/Font_JNI.cpp
-    ui/FontGlobals.cpp
+    src/native-lib/native-lib.cpp 
+
+    src/main.cpp
+
+    src/ui/View.cpp 
+    src/ui/TextView.cpp
+    src/ui/EditTextView.cpp
+    src/ui/ScrollView.cpp
+    
+    src/ui/Renderer.cpp
+    src/ui/FontRenderer.cpp
+    src/ui/Font_JNI.cpp
+    src/ui/FontGlobals.cpp
+
+    src/input/Dispatcher.cpp
 )
+
 target_include_directories(native-lib PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
