@@ -30,7 +30,7 @@ static JNIEnv* getEnv() {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_org_amistix_owlette_MainActivity_nativeGetMainActivity(
+Java_org_amistix_owlette_KeyboardTriggerer_nativeGetKeyboardTriggerer(
     JNIEnv* env, jobject obj) {
 
     env->GetJavaVM(&g_vm);
@@ -79,7 +79,7 @@ Java_org_amistix_owlette_GLView_nativeTouch(
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_org_amistix_owlette_MainActivity_nativeOnTextChanged(
+Java_org_amistix_owlette_KeyboardTriggerer_nativeOnTextChanged(
     JNIEnv* env, jobject obj, jstring text) {
     const char* str = env->GetStringUTFChars(text, nullptr);
     ui::EditTextView* focused = ui::EditTextView::getFocusedInstance();

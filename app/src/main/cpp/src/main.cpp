@@ -2,6 +2,7 @@
 #include "ui/View.h"
 #include "ui/ScrollView.h"
 #include "ui/TextView.h"
+#include "ui/EditTextView.h"
 
 ui::View* rootView = nullptr;
 extern GLint width, height;
@@ -33,7 +34,8 @@ void onInit()
         placeholder->setSize(width - 20, 200);
         placeholder->setColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-        ui::TextView* content = new ui::TextView();
+        // ui::TextView* content = new ui::TextView();
+        ui::EditTextView* content = new ui::EditTextView();
         content->setPosition(50, 50);
         content->setSize(400, 200);
         content->setText("Hello, Owlette!");
@@ -45,7 +47,7 @@ void onInit()
 
         placeholder->setOnTouchDownListener([placeholder, scrollView, content](float x, float y){
             scrollView->focus(x, y);
-            // content->setFocused(true);
+            content->setFocused(true);
             placeholder->setColor(0.7f, 0.7f, 0.7f, 1.0f);
         });
 
