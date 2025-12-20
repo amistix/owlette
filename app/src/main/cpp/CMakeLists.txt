@@ -108,6 +108,7 @@ add_library(native-lib SHARED
     native-lib.cpp 
     ui/View.cpp 
     ui/TextView.cpp
+    ui/EditTextView.cpp
     "input/Dispatcher.cpp"
     ui/ScrollView.cpp
     ui/Renderer.cpp

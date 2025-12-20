@@ -221,8 +221,8 @@ void drawText(const std::string& text,
         return;
     }
 
-    LOGD("✓ Drawing text: '%s' at (%.1f, %.1f) color:(%.2f,%.2f,%.2f,%.2f)", 
-         text.c_str(), x, y, r, g, b, a);
+    // LOGD("✓ Drawing text: '%s' at (%.1f, %.1f) color:(%.2f,%.2f,%.2f,%.2f)", 
+    //      text.c_str(), x, y, r, g, b, a);
 
     // Enable blending for transparent text
     glEnable(GL_BLEND);

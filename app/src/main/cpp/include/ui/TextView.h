@@ -16,10 +16,8 @@ namespace ui
 
         virtual void drawSelf() override;
 
-    private:
-        std::string _text = "Hello, Owlette!";
-
     protected:
+        std::string _text = "Hello, Owlette!";
         float _text_r, _text_g, _text_b, _text_a = 0.0f;
     };
     

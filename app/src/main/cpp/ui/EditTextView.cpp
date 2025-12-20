@@ -2,20 +2,45 @@
 #include "ui/FontRenderer.h"
 #include <GLES2/gl2.h>
 
+#include <android/log.h>
+
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "OWLETTE", __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "OWLETTE", __VA_ARGS__)
+
+extern JavaVM* g_vm;
+extern jobject g_activity;  // This should be defined globally, not in class
+
 namespace ui {
 
-EditTextView::EditText() {}
+EditTextView* EditTextView::_focusedInstance = nullptr;
 
-EditTextView::~EditText() {}
+EditTextView::EditTextView() {
+    setColor(1.0f, 1.0f, 1.0f, 1.0f);  // White background
+    setColorText(0.0f, 0.0f, 0.0f, 1.0f);  // Black text
+}
+
+EditTextView::~EditTextView() {
+}
 
 void EditTextView::setFocused(bool focused) {
+    LOGI("EditTextView setFocused: %d", focused);
     _focused = focused;
     _cursorBlinkTime = 0.0f;
     _showCursor = true;
+    
+    if (focused) {
+        _focusedInstance = this;
+        openKeyboard();
+    } else {
+        if (_focusedInstance == this) {
+            _focusedInstance = nullptr;
+        }
+        closeKeyboard();
+    }
 }
 
 void EditTextView::updateText(const std::string& text) {
-    setText(_text + text);
+    setText(text);  // Replace text, don't append
 }
 
 void EditTextView::update(float deltaTime) {
@@ -38,48 +63,67 @@ void EditTextView::drawSelf() {
     if (!_text.empty()) {
         drawText(_text, absX + 10, absY + 10, 0.0f, 0.0f, 0.0f, 1.0f, 48.0f);
     }
-    
-    // Draw cursor
-    if (_focused && _showCursor) {
-        drawCursor();
+}
+
+void EditTextView::openKeyboard() {
+    if (!g_vm) {
+        LOGE("g_vm is null");
+        return;
+    }
+    if (!g_activity) {
+        LOGE("g_activity is null");
+        return;
+    }
+
+    JNIEnv* env = nullptr;
+    g_vm->GetEnv((void**)&env, JNI_VERSION_1_6);
+
+    jclass cls = env->GetObjectClass(g_activity);
+    if (!cls) {
+        LOGE("Failed to get activity class");
+        return;
+    }
+
+    jmethodID mid = env->GetMethodID(cls, "showKeyboard", "(Ljava/lang/String;)V");
+    if (!mid) {
+        LOGE("showKeyboard() method NOT FOUND");
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+        return;
+    }
+
+    LOGI("Calling showKeyboard()");
+    jstring jText = env->NewStringUTF(_text.c_str());
+    env->CallVoidMethod(g_activity, mid, jText);
+
+    if (env->ExceptionCheck()) {
+        LOGE("Exception while calling showKeyboard()");
+        env->ExceptionDescribe();
+        env->ExceptionClear();
     }
 }
 
-void EditTextView::drawCursor() {
-    auto [absX, absY] = getAbsolutePosition();
-    auto [vw, vh] = getViewport();
+void EditTextView::closeKeyboard() {
+    if (!g_vm || !g_activity) return;
     
-    // Cursor position after text
-    float textWidth = _text.length() * 20.0f;
-    float cursorX = absX + 10 + textWidth;
-    float cursorY = absY + 10;
-    float cursorHeight = 40.0f;
-    float cursorWidth = 2.0f;
+    JNIEnv* env = nullptr;
+    bool needsDetach = false;
     
-    // Convert to normalized coordinates
-    float x1 = (cursorX / vw) * 2.0f - 1.0f;
-    float y1 = (cursorY / vh) * -2.0f + 1.0f;
-    float x2 = x1 + (cursorWidth / vw) * 2.0f;
-    float y2 = y1 - (cursorHeight / vh) * 2.0f;
+    jint result = g_vm->GetEnv((void**)&env, JNI_VERSION_1_6);
     
-    glUseProgram(getRectProgram());
+    if (result == JNI_EDETACHED) {
+        g_vm->AttachCurrentThread(&env, nullptr);
+        needsDetach = true;
+    }
     
-    GLfloat verts[] = {
-        x1, y1,
-        x2, y1,
-        x1, y2,
-        x2, y2
-    };
+    jclass activityClass = env->GetObjectClass(g_activity);
+    jmethodID method = env->GetMethodID(activityClass, "hideKeyboard", "()V");
+    env->CallVoidMethod(g_activity, method);
+    env->DeleteLocalRef(activityClass);
     
-    glUniform2f(getOffsetLoc(), 0.0f, 0.0f);
-    glUniform2f(getSizeLoc(), 1.0f, 1.0f);
-    glUniform4f(getColorLoc(), 0.0f, 0.0f, 0.0f, 1.0f);  // Black cursor
-    glUniform1f(getScrollLoc(), _scrollApplied);
-    
-    glEnableVertexAttribArray(getPosLoc());
-    glVertexAttribPointer(getPosLoc(), 2, GL_FLOAT, GL_FALSE, 0, verts);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glDisableVertexAttribArray(getPosLoc());
+    if (needsDetach) {
+        g_vm->DetachCurrentThread();   
+    }
 }
 
 } // namespace ui
