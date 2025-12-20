@@ -22,7 +22,7 @@ public class KeyboardTriggerer extends EditText {
         super(context);
         nativeGetKeyboardTriggerer();
 
-        setLayoutParams(new FrameLayout.LayoutParams(1, 1));
+        setLayoutParams(new FrameLayout.LayoutParams(0, 0));
         setBackgroundColor(0x00000000);
         setTextColor(0x00000000);
 
