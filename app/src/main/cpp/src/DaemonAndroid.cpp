@@ -40,6 +40,7 @@ namespace android
 	void DaemonAndroid::start()
 	{
 		Daemon.start();
+		isRunning = true;
 	}
 
 	void DaemonAndroid::stop()

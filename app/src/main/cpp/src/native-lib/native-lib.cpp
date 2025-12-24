@@ -6,6 +6,9 @@
 #include "input/Dispatcher.h"
 #include "ui/FontRenderer.h"
 
+#include "storage/AppStorageManager.h"
+#include "DaemonAndroid.h"
+
 #include "ui/EditTextView.h"
 
 #include "main.h"
@@ -14,6 +17,8 @@ GLint width, height;
 static GLint m_viewport[4];
 JavaVM* g_vm = nullptr;
 jobject g_activity = nullptr;
+
+i2p::android::DaemonAndroid* daemon = nullptr;
 
 static JNIEnv* getEnv() {
     JNIEnv* env = nullptr;
@@ -54,6 +59,17 @@ Java_org_amistix_owlette_GLView_nativeInit(JNIEnv* env, jobject obj) {
     
     onInit();
     input::setRoot(getRootView());
+
+    // Initialize the daemon
+    if (!daemon) {
+        daemon = new i2p::android::DaemonAndroid();
+        // i2p::fs::DetectDataDir(storage::getAppStoragePath(), false);
+        daemon->setDataDir(storage::getAppStoragePath());
+        bool daemonInitSuccess = daemon->init(1, nullptr);
+    }
+    if (!daemon->isRunning) {
+        daemon->start();
+    }
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -69,6 +85,12 @@ Java_org_amistix_owlette_GLView_nativeDraw(JNIEnv*, jclass) {
 
 extern "C" JNIEXPORT void JNICALL
 Java_org_amistix_owlette_GLView_nativeDestroy(JNIEnv* env, jclass) {
+    if (daemon)
+    { 
+        if (daemon->isRunning) daemon->stop();
+        delete daemon;
+        daemon = nullptr;
+    }
     onDestroy();
 }
 
@@ -90,3 +112,12 @@ Java_org_amistix_owlette_KeyboardTriggerer_nativeOnTextChanged(
     env->ReleaseStringUTFChars(text, str);
 }
 
+extern "C" JNIEXPORT void JNICALL
+Java_org_amistix_owlette_AppStorageManager_setAppStoragePath(
+    JNIEnv* env, jclass, jstring path) {
+    const char* str = env->GetStringUTFChars(path, nullptr);
+
+    storage::setAppStoragePath(std::string(str));
+
+    env->ReleaseStringUTFChars(path, str);
+}

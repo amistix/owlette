@@ -11,6 +11,7 @@
 
 #include <string>
 
+
 namespace i2p
 {
 namespace android
@@ -35,6 +36,8 @@ namespace android
 		void setLanguage (std::string language);
 		void setAcceptsTunnels (bool state);
 		void setDataDir (std::string path);
+
+		bool isRunning = false;
 	};
 
 	/**
