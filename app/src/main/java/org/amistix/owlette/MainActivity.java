@@ -17,8 +17,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         FrameLayout container = new FrameLayout(this);
         
+        new AppStorageManager(this);
+        
         glView = new GLView(this);
         FontRenderer.initFont(64.0f);
+
 
         KeyboardTriggerer hiddenEditText = new KeyboardTriggerer(this);
         

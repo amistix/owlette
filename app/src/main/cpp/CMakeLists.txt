@@ -120,6 +120,8 @@ add_library(native-lib SHARED
     src/ui/FontGlobals.cpp
 
     src/input/Dispatcher.cpp
+
+    src/storage/AppStorageManager.cpp
 )
 
 target_include_directories(native-lib PRIVATE

@@ -6,6 +6,8 @@
 #include "input/Dispatcher.h"
 #include "ui/FontRenderer.h"
 
+#include "storage/AppStorageManager.h"
+
 #include "ui/EditTextView.h"
 
 #include "main.h"
@@ -90,3 +92,12 @@ Java_org_amistix_owlette_KeyboardTriggerer_nativeOnTextChanged(
     env->ReleaseStringUTFChars(text, str);
 }
 
+extern "C" JNIEXPORT void JNICALL
+Java_org_amistix_owlette_AppStorageManager_setAppStoragePath(
+    JNIEnv* env, jclass, jstring path) {
+    const char* str = env->GetStringUTFChars(path, nullptr);
+
+    storage::setAppStoragePath(std::string(str));
+
+    env->ReleaseStringUTFChars(path, str);
+}
