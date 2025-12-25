@@ -64,7 +64,7 @@ file(GLOB LIB_CLIENT_SRC_FILES "${LIB_CLIENT_SRC_PATH}/*.cpp")
 file(GLOB LANG_SRC_FILES "${LANG_SRC_PATH}/*.cpp")
 
 set(SRC_FILES
-    src/DaemonAndroid.cpp
+    src/i2pd/DaemonAndroid.cpp
     ${IFADDRS_PATH}/ifaddrs.cpp
     ${IFADDRS_PATH}/bionic_netlink.cpp
     ${LIB_SRC_FILES}
@@ -107,6 +107,8 @@ target_link_libraries(i2pd
 add_library(native-lib SHARED 
     src/native-lib/native-lib.cpp 
 
+    src/i2pd/I2pdManager.cpp
+
     src/main.cpp
 
     src/ui/View.cpp 
@@ -126,5 +128,8 @@ add_library(native-lib SHARED
 
 target_include_directories(native-lib PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${LIB_SRC_PATH}              # ADD THIS
+    ${LIB_CLIENT_SRC_PATH}       # ADD THIS
+    ${DAEMON_SRC_PATH} 
 )
 target_link_libraries(native-lib i2pd)

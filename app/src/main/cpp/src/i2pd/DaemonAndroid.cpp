@@ -6,14 +6,8 @@
 * See full license text in LICENSE file at top of project tree
 */
 
-#include <iostream>
-#include <chrono>
-#include <thread>
-#include <exception>
-#include <boost/exception/diagnostic_information.hpp>
-#include <boost/exception_ptr.hpp>
-#include "FS.h"
-#include "DaemonAndroid.h"
+
+#include "i2pd/DaemonAndroid.h"
 #include "Daemon.h"
 #include "I18N.h"
 #include "Config.h"
@@ -21,6 +15,7 @@
 #include "ClientContext.h"
 #include "Transports.h"
 #include "Tunnel.h"
+#include "FS.h"
 
 namespace i2p
 {

@@ -6,10 +6,15 @@
 * See full license text in LICENSE file at top of project tree
 */
 
-#ifndef DAEMON_ANDROID_H
-#define DAEMON_ANDROID_H
-
+#pragma once
 #include <string>
+
+#include <iostream>
+#include <chrono>
+#include <thread>
+#include <exception>
+#include <boost/exception/diagnostic_information.hpp>
+#include <boost/exception_ptr.hpp>
 
 
 namespace i2p
@@ -56,5 +61,3 @@ namespace android
 	// void SetLanguage (std::string language);
 }
 }
-
-#endif // DAEMON_ANDROID_H

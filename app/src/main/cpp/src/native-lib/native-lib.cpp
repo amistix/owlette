@@ -7,7 +7,7 @@
 #include "ui/FontRenderer.h"
 
 #include "storage/AppStorageManager.h"
-#include "DaemonAndroid.h"
+#include "i2pd/I2pdManager.h"
 
 #include "ui/EditTextView.h"
 
@@ -18,7 +18,7 @@ static GLint m_viewport[4];
 JavaVM* g_vm = nullptr;
 jobject g_activity = nullptr;
 
-i2p::android::DaemonAndroid* daemon = nullptr;
+i2p::I2pdManager* i2pdManager = nullptr;
 
 static JNIEnv* getEnv() {
     JNIEnv* env = nullptr;
@@ -61,14 +61,9 @@ Java_org_amistix_owlette_GLView_nativeInit(JNIEnv* env, jobject obj) {
     input::setRoot(getRootView());
 
     // Initialize the daemon
-    if (!daemon) {
-        daemon = new i2p::android::DaemonAndroid();
-        // i2p::fs::DetectDataDir(storage::getAppStoragePath(), false);
-        daemon->setDataDir(storage::getAppStoragePath());
-        bool daemonInitSuccess = daemon->init(1, nullptr);
-    }
-    if (!daemon->isRunning) {
-        daemon->start();
+    if (!i2pdManager) {
+        i2pdManager = new i2p::I2pdManager();
+        i2pdManager->start();
     }
 }
 
@@ -85,11 +80,11 @@ Java_org_amistix_owlette_GLView_nativeDraw(JNIEnv*, jclass) {
 
 extern "C" JNIEXPORT void JNICALL
 Java_org_amistix_owlette_GLView_nativeDestroy(JNIEnv* env, jclass) {
-    if (daemon)
+    if (i2pdManager)
     { 
-        if (daemon->isRunning) daemon->stop();
-        delete daemon;
-        daemon = nullptr;
+        i2pdManager->shutdown();
+        delete i2pdManager;
+        i2pdManager = nullptr;
     }
     onDestroy();
 }
