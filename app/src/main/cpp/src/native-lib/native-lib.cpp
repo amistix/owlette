@@ -75,6 +75,7 @@ Java_org_amistix_owlette_GLView_nativeResize(JNIEnv*, jclass, jint width, jint h
 
 extern "C" JNIEXPORT void JNICALL
 Java_org_amistix_owlette_GLView_nativeDraw(JNIEnv*, jclass) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     onDraw();
 }
 

@@ -131,5 +131,6 @@ target_include_directories(native-lib PRIVATE
     ${LIB_SRC_PATH}              # ADD THIS
     ${LIB_CLIENT_SRC_PATH}       # ADD THIS
     ${DAEMON_SRC_PATH} 
+    ${LANG_SRC_PATH}
 )
 target_link_libraries(native-lib i2pd)

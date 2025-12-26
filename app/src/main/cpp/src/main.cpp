@@ -4,15 +4,11 @@
 #include "ui/TextView.h"
 #include "ui/EditTextView.h"
 
-#include <chrono>
 
 ui::View* rootView = nullptr;
 extern GLint width, height;
 
 ui::View* getRootView() {return rootView;}
-
-using namespace std::chrono;
-auto lastTime = high_resolution_clock::now();
 
 void onInit() 
 {
@@ -27,10 +23,25 @@ void onInit()
     rootView->setSize(width, height);
 
     ui::ScrollView* scrollView = new ui::ScrollView();
-    scrollView->setPosition(0, 0);
-    scrollView->setSize(width, height);
+    scrollView->setPosition(0, 110);
+    scrollView->setSize(width, height - 320);
     scrollView->setColor(0.8f, 0.8f, 0.8f, 0.0f);
-    scrollView->setContainerHeight(4210);
+    scrollView->setContainerHeight(210 * 20 + 10);
+
+    ui::View* topBar = new ui::View();
+    topBar->setPosition(0, 0);
+    topBar->setSize(width, 100);
+    topBar->setColor(224.0f/255.0f, 25.0f/255.0f,78.0f/255.0f, 1.0f);
+
+    ui::TextView* title = new ui::TextView();
+    title->setPosition(20, 5);
+    title->setColor(1.0f, 1.0f, 1.0f, 0.0f);
+    title->setColorText(1.0f, 1.0f, 1.0f, 1.0f);
+    title->setSize(400, 100);
+    title->setText("Owlette UI Demo");
+    topBar->addChild(title);
+
+    rootView->addChild(topBar);
 
     for (int i=0; i<20; i++)
     {
@@ -64,21 +75,22 @@ void onInit()
         });
     }
 
-    ui::View* fpsPlaceholder = new ui::View();
-    fpsPlaceholder->setPosition(0, 0);
-    fpsPlaceholder->setSize(width - 20, 200);
-    fpsPlaceholder->setColor(0.5f, 0.5f, 0.5f, 0.0f);
-
-    ui::TextView* fpsCounter = new ui::TextView();
-    fpsCounter->setPosition(50, 50);
-    fpsCounter->setSize(400, 200);
-    fpsCounter->setText("Hello, Owlette!");
-    fpsCounter->setColor(0.0f, 0.0f, 0.0f, 0.0f);
-    fpsCounter->setColorText(0.0f, 0.0f, 0.0f, 1.0f);
-
-    fpsPlaceholder->addChild(fpsCounter);
     rootView->addChild(scrollView);
-    rootView->addChild(fpsPlaceholder);
+
+    ui::EditTextView* entry = new ui::EditTextView();
+    entry->setPosition(0, height - 200);
+    entry->setSize(width, 200);
+    entry->setText("Hello!");
+    entry->setColor(0.96f, 0.18f, 0.43f, 0.4f);
+    entry->setColorText(0.0f, 0.0f, 0.0f, 1.0f);
+
+    entry->setOnTouchDownListener([entry] (float x, float y) {
+        if (!entry->isFocused()) entry->setFocused(true);
+        else entry->setFocused(false);
+    });
+
+    rootView->addChild(entry);
+
 }
 
 void onResize(int width, int height) 
@@ -87,21 +99,15 @@ void onResize(int width, int height)
     {
         rootView->setSize(width, height);
         rootView->setViewport(width, height);
+        rootView->getChildren()[1]->setSize(width, height - 320); // scrollView
+        rootView->getChildren()[2]->setPosition(0, height - 200);
     }
 }
 
 void onDraw() 
 {
-    if (rootView) 
-    {
-        auto currentTime = high_resolution_clock::now();
-        duration<double> deltaTime = currentTime - lastTime;
-        double fps = 1.0 / deltaTime.count();
-        lastTime = currentTime;
-        ui::TextView* textView = static_cast<ui::TextView*>(rootView->getChildren()[1]->getChildren()[0]);
-        textView->setText("FPS: " + std::to_string((int)fps));
-        rootView->draw();
-    }
+    if (rootView) rootView->draw();
+
 }
 
 

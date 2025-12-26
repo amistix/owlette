@@ -1,5 +1,6 @@
 #include "i2pd/I2pdManager.h"
 #include "FS.h"
+#include "./DestinationClient.cpp"
 
 namespace i2p
 {
@@ -39,6 +40,7 @@ namespace i2p
         daemonThread = new std::thread([this]() {
             this->initialize();
             this->daemon->start();
+            startDestinationClient();
         });
     }
 
