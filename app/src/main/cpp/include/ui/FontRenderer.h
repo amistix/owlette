@@ -1,26 +1,35 @@
 #pragma once
 #include <string>
-#include <GLES2/gl2.h>
+#include <GLES2/gl2.h>  // ✅ Add this include for GLuint and GLint types
 
-// Initialize font texture and shader (call once after font data is loaded)
+struct FontAtlas;
+
+// Initialize the font rendering system (creates shader program and buffers)
 void initFontRenderer();
 
-// Clean up font resources
-void cleanupFontRenderer();
+// Clean up font rendering resources
+void cleanupFontRenderer(FontAtlas& atlas);
 
-// Upload font texture to GPU if not already done
-void uploadFontTexture();
+// Upload font texture to GPU (call once after creating atlas)
+void uploadFontTexture(FontAtlas& atlas);
 
-// Draw text at pixel coordinates (x, y)
-// Color components: r, g, b, a (0.0 to 1.0)
-// size parameter is currently unused but kept for API compatibility
+// Draw text at pixel coordinates with specified color
 void drawText(const std::string& text,
               float x, float y,
               float r, float g, float b, float a,
-              float size = 32.0f);
+              FontAtlas& atlas);
 
-// Measure text width in pixels
-float measureText(const std::string& text);
+// Measure the width of text in pixels
+float measureText(const std::string& text, const FontAtlas& atlas);
 
-// Get font height in pixels
-float getFontHeight();
+// Get the height of the font in pixels
+float getFontHeight(const FontAtlas& atlas);
+
+// Shader-related functions (for internal use)
+GLuint getRectProgram();
+GLint getOffsetLoc();
+GLint getSizeLoc();
+GLint getColorLoc();
+GLint getPosLoc();
+void initRectShader();
+void destroyGLResources();

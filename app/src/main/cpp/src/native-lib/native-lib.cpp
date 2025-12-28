@@ -3,6 +3,8 @@
 #include <jni.h>
 #include <android/log.h>
 
+#include "ui/FontRenderer.h"
+
 #include "input/Dispatcher.h"
 #include "ui/FontRenderer.h"
 
@@ -48,17 +50,25 @@ Java_org_amistix_owlette_KeyboardTriggerer_nativeGetKeyboardTriggerer(
 extern "C" JNIEXPORT void JNICALL
 Java_org_amistix_owlette_GLView_nativeInit(JNIEnv* env, jobject obj) {
 
-    glGetIntegerv( GL_VIEWPORT, m_viewport );
+    glGetIntegerv(GL_VIEWPORT, m_viewport);
     width = m_viewport[2];
     height = m_viewport[3];
 
     destroyGLResources();
     initRectShader();
     initFontRenderer();
-    uploadFontTexture(); 
     
     onInit();
     input::setRoot(getRootView());
+
+    // Re-upload font texture if it exists
+    extern FontAtlas* globalAtlas;
+    if (globalAtlas && globalAtlas->pixels) {
+        globalAtlas->fontTexture = 0; // Reset texture ID
+        uploadFontTexture(*globalAtlas);
+        __android_log_print(ANDROID_LOG_DEBUG, "native-lib", 
+                          "Re-uploaded font texture after context loss");
+    }
 
     // Initialize the daemon
     if (!i2pdManager) {

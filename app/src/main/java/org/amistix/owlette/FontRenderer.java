@@ -8,77 +8,96 @@ import android.util.Log;
 
 public class FontRenderer {
 
-    static {
-        System.loadLibrary("native-lib");
-    }
     private static final String TAG = "FontRenderer";
 
     private static final String CHARSET =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" +
         " .,!?;:'-_()[]{}@#$%^&*+=/<>\"\\|`~";
 
-    private static boolean initialized = false;
-
-    public static void initFont(float textSize) {
+    public static JavaFontAtlas initFont(float textSize) {
         
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setTextSize(textSize);
         paint.setColor(0xFFFFFFFF);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextAlign(Paint.Align.LEFT);
 
+        Paint.FontMetrics metrics = paint.getFontMetrics();
+        
+        int ascent = (int) Math.ceil(Math.abs(metrics.ascent));
+        int descent = (int) Math.ceil(Math.abs(metrics.descent));
+        int height = ascent + descent;
+        
+        Log.d(TAG, "Font metrics - ascent: " + ascent + ", descent: " + descent + ", height: " + height);
+
+        // Measure total width
         int totalWidth = 0;
-        for (char c : CHARSET.toCharArray()) {
-            int w = (int) paint.measureText(String.valueOf(c));
-            totalWidth += w;
-            Log.d(TAG, "  Char '" + c + "' width: " + w);
+        int[] glyphWidths = new int[CHARSET.length()];
+        
+        for (int i = 0; i < CHARSET.length(); i++) {
+            char c = CHARSET.charAt(i);
+            float measured = paint.measureText(String.valueOf(c));
+            int w = (int) Math.ceil(measured);
+            glyphWidths[i] = Math.max(w, 1);
+            totalWidth += glyphWidths[i];
         }
 
-        int height = (int) (paint.getFontMetrics().bottom - paint.getFontMetrics().top);
+        Log.d(TAG, "Creating atlas: " + totalWidth + "x" + height + " for size " + textSize);
 
+        // Create bitmap
         Bitmap atlas = Bitmap.createBitmap(totalWidth, height, Bitmap.Config.ALPHA_8);
         Canvas canvas = new Canvas(atlas);
+        canvas.drawColor(0x00000000);
 
         int x = 0;
         int[] glyphX = new int[CHARSET.length()];
         int[] glyphW = new int[CHARSET.length()];
 
+        // Draw characters
         for (int i = 0; i < CHARSET.length(); i++) {
             char c = CHARSET.charAt(i);
-            int w = (int) paint.measureText(String.valueOf(c));
-            canvas.drawText(String.valueOf(c), x, -paint.getFontMetrics().top, paint);
+            int w = glyphWidths[i];
+            
+            canvas.drawText(String.valueOf(c), x, ascent, paint);
 
             glyphX[i] = x;
             glyphW[i] = w;
             x += w;
         }
 
-        Log.d(TAG, "Creating ByteBuffer of size: " + (atlas.getWidth() * atlas.getHeight()));
-        ByteBuffer buffer = ByteBuffer.allocateDirect(atlas.getWidth() * atlas.getHeight());
-        atlas.copyPixelsToBuffer(buffer);
-        buffer.position(0);
-
-        Log.d(TAG, "Calling native method...");
-        nativeSetFontData(
-                buffer,
-                atlas.getWidth(),
-                atlas.getHeight(),
-                glyphX,
-                glyphW,
-                CHARSET
-        );
+        // ✅ MANUAL PIXEL COPY - ensures proper byte order
+        int bufferSize = totalWidth * height;
+        ByteBuffer buffer = ByteBuffer.allocateDirect(bufferSize);
         
-        initialized = true;
-    }
+        // Get pixels as byte array
+        byte[] pixels = new byte[bufferSize];
+        ByteBuffer tempBuffer = ByteBuffer.allocate(bufferSize);
+        atlas.copyPixelsToBuffer(tempBuffer);
+        tempBuffer.rewind();
+        tempBuffer.get(pixels);
+        
+        // Copy to direct buffer
+        buffer.put(pixels);
+        buffer.rewind();
 
-    public static boolean isInitialized() {
-        return initialized;
-    }
+        Log.d(TAG, "Buffer size: " + bufferSize + " bytes");
+        
+        // Log pixel sample for verification
+        int nonZero = 0;
+        for (int i = 0; i < Math.min(1000, pixels.length); i++) {
+            if (pixels[i] != 0) nonZero++;
+        }
+        Log.d(TAG, "Pixel check: " + nonZero + " non-zero in first 1000 pixels");
 
-    public static native void nativeSetFontData(
-            ByteBuffer buf,
-            int width,
-            int height,
-            int[] glyphX,
-            int[] glyphW,
-            String chars
-    );
+        JavaFontAtlas result = new JavaFontAtlas();
+        result.fontSize = textSize;
+        result.buffer = buffer;
+        result.width = totalWidth;
+        result.height = height;
+        result.glyphX = glyphX;
+        result.glyphW = glyphW;
+        result.chars = CHARSET;
+
+        return result;
+    }
 }

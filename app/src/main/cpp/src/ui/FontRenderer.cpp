@@ -1,4 +1,5 @@
 #include "ui/FontRenderer.h"
+#include "ui/FontAtlas.h"
 #include <GLES2/gl2.h>
 #include <android/log.h>
 #include <string>
@@ -9,16 +10,9 @@
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-// External font data from JNI
-extern int g_fontWidth;
-extern int g_fontHeight;
-extern unsigned char* g_fontPixels;
-extern std::vector<int> g_glyphX;
-extern std::vector<int> g_glyphW;
-extern std::string g_charset;
+// Enable detailed logging for debugging (set to 0 for production)
+#define FONT_DEBUG_LOGGING 0
 
-// OpenGL resources
-static GLuint g_fontTexture = 0;
 static GLuint g_fontShader = 0;
 static GLuint g_vbo = 0;
 static GLuint g_ibo = 0;
@@ -47,7 +41,7 @@ uniform sampler2D uTex;
 uniform vec4 uColor;
 varying vec2 vTex;
 void main() {
-    float alpha = texture2D(uTex, vTex).r;
+    float alpha = texture2D(uTex, vTex).a;
     gl_FragColor = vec4(uColor.rgb, uColor.a * alpha);
 }
 )";
@@ -90,7 +84,6 @@ static GLuint createShaderProgram() {
 }
 
 void initFontRenderer() {
-    cleanupFontRenderer();  
     g_fontShader = createShaderProgram();
     if (g_fontShader == 0) {
         LOGE("Failed to create shader program");
@@ -113,10 +106,10 @@ void initFontRenderer() {
     LOGD("Font renderer initialized - VBO:%d IBO:%d", g_vbo, g_ibo);
 }
 
-void cleanupFontRenderer() {
-    if (g_fontTexture != 0) {
-        glDeleteTextures(1, &g_fontTexture);
-        g_fontTexture = 0;
+void cleanupFontRenderer(FontAtlas& atlas) {
+    if (atlas.fontTexture != 0) {
+        glDeleteTextures(1, &atlas.fontTexture);
+        atlas.fontTexture = 0;
     }
     if (g_vbo != 0) {
         glDeleteBuffers(1, &g_vbo);
@@ -133,54 +126,71 @@ void cleanupFontRenderer() {
     LOGD("Font renderer cleaned up");
 }
 
-void uploadFontTexture() {
-    if (g_fontTexture != 0) {
-        glDeleteTextures(1, &g_fontTexture);
-        g_fontTexture = 0;
+void uploadFontTexture(FontAtlas& atlas) {
+    if (atlas.fontTexture != 0) {
+        GLboolean isTexture = glIsTexture(atlas.fontTexture);
+        if (isTexture) {
+            LOGD("Font texture already uploaded and valid (ID: %d)", atlas.fontTexture);
+            return;
+        } else {
+            LOGD("Font texture ID exists but invalid, re-creating");
+            atlas.fontTexture = 0;
+        }
     }
     
-    if (!g_fontPixels) {
-        LOGE("❌ Font pixels not loaded! g_fontPixels is NULL");
+    if (!atlas.pixels) {
+        LOGE("❌ Font pixels not loaded! pixels is NULL");
         return;
     }
     
-    if (g_fontWidth == 0 || g_fontHeight == 0) {
-        LOGE("❌ Invalid font dimensions: %dx%d", g_fontWidth, g_fontHeight);
+    if (atlas.textureWidth == 0 || atlas.textureHeight == 0) {
+        LOGE("❌ Invalid font dimensions: %dx%d", atlas.textureWidth, atlas.textureHeight);
         return;
     }
     
-    if (g_glyphX.empty() || g_glyphW.empty()) {
+    if (atlas.glyphX.empty() || atlas.glyphW.empty()) {
         LOGE("❌ Glyph data not loaded! glyphX size:%zu glyphW size:%zu", 
-             g_glyphX.size(), g_glyphW.size());
+             atlas.glyphX.size(), atlas.glyphW.size());
         return;
     }
     
-    if (g_charset.empty()) {
+    if (atlas.charset.empty()) {
         LOGE("❌ Charset is empty!");
         return;
     }
 
     LOGD("✓ Creating font texture...");
-    LOGD("  - Dimensions: %dx%d", g_fontWidth, g_fontHeight);
-    LOGD("  - Glyphs: %zu", g_glyphX.size());
-    LOGD("  - Charset: %s", g_charset.c_str());
+    LOGD("  - Dimensions: %dx%d", atlas.textureWidth, atlas.textureHeight);
+    LOGD("  - Glyphs: %zu", atlas.glyphX.size());
+    LOGD("  - Charset length: %zu", atlas.charset.length());
 
-    glGenTextures(1, &g_fontTexture);
-    glBindTexture(GL_TEXTURE_2D, g_fontTexture);
+    glGenTextures(1, &atlas.fontTexture);
+    glBindTexture(GL_TEXTURE_2D, atlas.fontTexture);
 
-    // Use GL_LUMINANCE (single channel) for ALPHA_8 bitmap
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE,
-                 g_fontWidth, g_fontHeight,
-                 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, g_fontPixels);
+    // ✅ CRITICAL FIX: Set pixel unpack alignment to 1 byte
+    // By default, OpenGL expects rows to be aligned to 4 bytes
+    // With GL_ALPHA (1 byte per pixel), widths not divisible by 4 get skewed
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    // Upload as ALPHA texture
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA,
+        atlas.textureWidth, atlas.textureHeight,
+        0, GL_ALPHA, GL_UNSIGNED_BYTE, atlas.pixels);
+
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+        LOGE("❌ glTexImage2D error: 0x%x", err);
+    }
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    LOGD("✓ Font texture uploaded successfully! Texture ID: %d", g_fontTexture);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    LOGD("✓ Font texture uploaded successfully! Texture ID: %d", atlas.fontTexture);
     
-    // Initialize shader if not done yet
     if (g_fontShader == 0) {
         initFontRenderer();
     }
@@ -189,110 +199,130 @@ void uploadFontTexture() {
 void drawText(const std::string& text,
               float x, float y,
               float r, float g, float b, float a,
-              float size)
+              FontAtlas& atlas)
 {
-    // Debug checks
-    if (text.empty()) {
-        LOGD("drawText: empty text");
+    static bool loggedOnce = false;
+    
+    if (text.empty()) return;
+    
+    if (!atlas.pixels) {
+        LOGE("❌ drawText: pixels is NULL!");
         return;
     }
     
-    if (!g_fontPixels) {
-        LOGE("❌ drawText: g_fontPixels is NULL! Font not loaded.");
+    if (atlas.glyphX.empty() || atlas.glyphW.empty()) {
+        LOGE("❌ drawText: glyph data empty!");
         return;
     }
     
-    if (g_glyphX.empty() || g_glyphW.empty()) {
-        LOGE("❌ drawText: glyph data empty! glyphX:%zu glyphW:%zu", 
-             g_glyphX.size(), g_glyphW.size());
-        return;
-    }
-    
-    // Ensure texture and shader are ready
-    uploadFontTexture();
+    if (atlas.fontTexture == 0) uploadFontTexture(atlas);
     
     if (g_fontShader == 0) {
-        LOGE("❌ drawText: shader program is 0!");
+        LOGE("❌ drawText: shader is 0!");
         return;
     }
     
-    if (g_fontTexture == 0) {
-        LOGE("❌ drawText: font texture is 0!");
+    if (atlas.fontTexture == 0) {
+        LOGE("❌ drawText: texture is 0!");
         return;
     }
 
-    // LOGD("✓ Drawing text: '%s' at (%.1f, %.1f) color:(%.2f,%.2f,%.2f,%.2f)", 
-    //      text.c_str(), x, y, r, g, b, a);
+    // Log first call for debugging
+    if (!loggedOnce) {
+        loggedOnce = true;
+        LOGD("=== First drawText call ===");
+        LOGD("Text: '%s'", text.c_str());
+        LOGD("Position: (%.1f, %.1f)", x, y);
+        LOGD("Color: (%.2f, %.2f, %.2f, %.2f)", r, g, b, a);
+        LOGD("Atlas: %dx%d, texture ID: %d", atlas.textureWidth, atlas.textureHeight, atlas.fontTexture);
+        LOGD("Font size: %.1f", atlas.fontSize);
+    }
 
-    // Enable blending for transparent text
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Use shader program
     glUseProgram(g_fontShader);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, g_fontTexture);
+    glBindTexture(GL_TEXTURE_2D, atlas.fontTexture);
     glUniform1i(g_uTex, 0);
     glUniform4f(g_uColor, r, g, b, a);
 
-    // Get viewport for NDC conversion
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     float vw = float(viewport[2]);
     float vh = float(viewport[3]);
 
-    LOGD("  Viewport: %dx%d", viewport[2], viewport[3]);
-
-    // Build vertex data for all characters
     std::vector<GLfloat> vertices;
     std::vector<GLushort> indices;
-    vertices.reserve(text.length() * 16); // 4 vertices * 4 floats per char
-    indices.reserve(text.length() * 6);   // 6 indices per char
+    vertices.reserve(text.length() * 16);
+    indices.reserve(text.length() * 6);
 
     float cx = x;
     float cy = y;
     GLushort vertexIndex = 0;
-    int charCount = 0;
 
+    float fontHeight = float(atlas.textureHeight);
+    float texWidth = float(atlas.textureWidth);
+    float texHeight = float(atlas.textureHeight);
+
+    int charCount = 0;
     for (char c : text) {
-        size_t idx = g_charset.find(c);
+        size_t idx = atlas.charset.find(c);
         if (idx == std::string::npos) {
-            LOGD("  Character '%c' not in charset, skipping", c);
-            cx += size * 0.5f;
+            cx += atlas.fontSize * 0.5f;
             continue;
         }
 
-        float gw = float(g_glyphW[idx]);
-        float gx = float(g_glyphX[idx]);
+        float gw = float(atlas.glyphW[idx]);
+        float gx = float(atlas.glyphX[idx]);
 
-        LOGD("  Char '%c': glyph x=%.1f w=%.1f", c, gx, gw);
-
-        // Texture coordinates
-        float tx0 = gx / float(g_fontWidth);
-        float tx1 = (gx + gw) / float(g_fontWidth);
+        // Calculate texture coordinates with proper precision
+        // Add small epsilon to avoid edge artifacts
+        float epsilon = 0.0f; // Can try 0.5f/texWidth if needed
+        float tx0 = (gx + epsilon) / texWidth;
+        float tx1 = (gx + gw - epsilon) / texWidth;
         float ty0 = 0.0f;
         float ty1 = 1.0f;
 
-        // Convert pixel coordinates to NDC [-1, 1]
-        float ndcX0 = (cx / vw) * 2.0f - 1.0f;
-        float ndcY0 = 1.0f - (cy / vh) * 2.0f;
-        float ndcX1 = ((cx + gw) / vw) * 2.0f - 1.0f;
-        float ndcY1 = 1.0f - ((cy + g_fontHeight) / vh) * 2.0f;
+        if (!loggedOnce && charCount < 3) {
+            LOGD("Char '%c' [%d]:", c, charCount);
+            LOGD("  Glyph: x=%.1f w=%.1f", gx, gw);
+            LOGD("  TexCoord: x=(%.6f to %.6f) of %.1f", tx0, tx1, texWidth);
+        }
 
-        // Add 4 vertices (position + texcoord)
+        // Screen quad in pixels
+        float x0 = cx;
+        float y0 = cy;
+        float x1 = cx + gw;
+        float y1 = cy + fontHeight;
+
+        // Convert to NDC
+        float ndcX0 = (x0 / vw) * 2.0f - 1.0f;
+        float ndcY0 = 1.0f - (y0 / vh) * 2.0f;
+        float ndcX1 = (x1 / vw) * 2.0f - 1.0f;
+        float ndcY1 = 1.0f - (y1 / vh) * 2.0f;
+
+        if (!loggedOnce && charCount < 1) {
+            LOGD("  Screen: (%.1f,%.1f) to (%.1f,%.1f)", x0, y0, x1, y1);
+            LOGD("  NDC: (%.6f,%.6f) to (%.6f,%.6f)", ndcX0, ndcY0, ndcX1, ndcY1);
+        }
+
+        // Bottom-left
         vertices.push_back(ndcX0); vertices.push_back(ndcY1);
         vertices.push_back(tx0); vertices.push_back(ty1);
         
+        // Bottom-right
         vertices.push_back(ndcX1); vertices.push_back(ndcY1);
         vertices.push_back(tx1); vertices.push_back(ty1);
         
+        // Top-right
         vertices.push_back(ndcX1); vertices.push_back(ndcY0);
         vertices.push_back(tx1); vertices.push_back(ty0);
         
+        // Top-left
         vertices.push_back(ndcX0); vertices.push_back(ndcY0);
         vertices.push_back(tx0); vertices.push_back(ty0);
 
-        // Add 6 indices for 2 triangles
         indices.push_back(vertexIndex + 0);
         indices.push_back(vertexIndex + 1);
         indices.push_back(vertexIndex + 2);
@@ -306,25 +336,20 @@ void drawText(const std::string& text,
         charCount++;
     }
 
-    if (vertices.empty()) {
-        LOGD("  No valid characters to render");
-        return;
+    if (vertices.empty()) return;
+
+    if (!loggedOnce) {
+        LOGD("Generated %d chars, %zu vertices", charCount, vertices.size()/4);
     }
 
-    LOGD("  Rendering %d characters, %zu vertices, %zu indices", 
-         charCount, vertices.size()/4, indices.size());
-
-    // Upload vertex data
     glBindBuffer(GL_ARRAY_BUFFER, g_vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat),
                  vertices.data(), GL_DYNAMIC_DRAW);
 
-    // Upload index data
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLushort),
                  indices.data(), GL_DYNAMIC_DRAW);
 
-    // Set vertex attributes
     glEnableVertexAttribArray(g_aPos);
     glEnableVertexAttribArray(g_aTex);
 
@@ -333,37 +358,33 @@ void drawText(const std::string& text,
     glVertexAttribPointer(g_aTex, 2, GL_FLOAT, GL_FALSE, 
                          4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
 
-    // Draw all characters in one call
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, 0);
 
-    // Check for GL errors
     GLenum err = glGetError();
     if (err != GL_NO_ERROR) {
-        LOGE("  OpenGL error after draw: 0x%x", err);
-    } else {
-        LOGD("  ✓ Draw successful!");
+        LOGE("OpenGL error after draw: 0x%x", err);
     }
 
-    // Cleanup
     glDisableVertexAttribArray(g_aPos);
     glDisableVertexAttribArray(g_aTex);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-float measureText(const std::string& text) {
-    if (text.empty() || g_glyphW.empty()) return 0.0f;
+float measureText(const std::string& text, const FontAtlas& atlas) {
+    if (text.empty() || atlas.glyphW.empty()) return 0.0f;
     
     float width = 0.0f;
     for (char c : text) {
-        size_t idx = g_charset.find(c);
-        if (idx != std::string::npos && idx < g_glyphW.size()) {
-            width += float(g_glyphW[idx]);
+        size_t idx = atlas.charset.find(c);
+        if (idx != std::string::npos && idx < atlas.glyphW.size()) {
+            width += float(atlas.glyphW[idx]);
         }
     }
     return width;
 }
 
-float getFontHeight() {
-    return float(g_fontHeight);
+float getFontHeight(const FontAtlas& atlas) {
+    return float(atlas.textureHeight);
 }

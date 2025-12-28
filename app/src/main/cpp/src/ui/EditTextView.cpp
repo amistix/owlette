@@ -42,8 +42,8 @@ void EditTextView::drawSelf() {
     View::drawSelf();
     
     // Draw black text
-    if (!_text.empty()) {
-        drawText(_text, absX + 10, absY + 10, 0.0f, 0.0f, 0.0f, 1.0f, 48.0f);
+    if (!_text.empty() && _atlas) {
+        drawText(_text, absX + 10, absY + 10, _text_r, _text_g, _text_b, _text_a, *_atlas);
     }
 }
 

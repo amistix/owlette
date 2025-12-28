@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
         new AppStorageManager(this);
         
         glView = new GLView(this);
-        FontRenderer.initFont(64.0f);
 
 
         KeyboardTriggerer hiddenEditText = new KeyboardTriggerer(this);
