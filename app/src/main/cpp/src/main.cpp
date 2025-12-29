@@ -13,8 +13,9 @@
 ui::View* rootView = nullptr;
 extern GLint width, height;
 
+FontAtlas* globalAtlas = nullptr;
+
 std::chrono::steady_clock::time_point startTime;
-FontAtlas* globalAtlas = nullptr;  // Global persistent atlas
 
 ui::View* getRootView() { return rootView; }
 
@@ -37,31 +38,43 @@ void onInit()
     rootView->setColor(0.9f, 0.9f, 0.9f, 1.0f);
     rootView->setSize(width, height);
 
-    // Test with size 32 (you confirmed this works)
-    globalAtlas = initFont(53.5f);
+    globalAtlas = initFont(45.0f);
 
-    ui::ScrollView* scrollView = new ui::ScrollView();
-    scrollView->setPosition(0, 110);
-    scrollView->setSize(width, height - 320);
-    scrollView->setColor(0.8f, 0.8f, 0.8f, 0.0f);
-    scrollView->setContainerHeight(210 * 20 + 10);
-
+    
     ui::View* topBar = new ui::View();
     topBar->setPosition(0, 0);
     topBar->setSize(width, 100);
     topBar->setColor(224.0f/255.0f, 25.0f/255.0f, 78.0f/255.0f, 1.0f);
-
-    ui::TextView* title = new ui::TextView();
+    
+    ui::EditTextView* title = new ui::EditTextView();
     title->setPosition(20, 5);
     title->setColor(1.0f, 1.0f, 1.0f, 0.0f);
     title->setColorText(1.0f, 1.0f, 1.0f, 1.0f);
     title->setSize(400, 100);
     title->setText("Owlette UI Demo");
     title->setFontAtlas(globalAtlas);
+    title->setOnTouchDownListener([title, topBar](float x, float y) {
+        if (!title->isFocused()) 
+        title->setFocused(true);
+        else 
+        title->setFocused(false);
+    });
+    title->setOnFocusedListener([topBar]() {
+        auto currentTime = std::chrono::steady_clock::now();
+        float elapsed = std::chrono::duration<float>(currentTime - startTime).count();
+        topBar->setColor(sin(elapsed), sin(elapsed + 1.6), sin(elapsed + 3.14), 1.0f);
+    });
+    
+    
     topBar->addChild(title);
-
     rootView->addChild(topBar);
+    
 
+    ui::ScrollView* scrollView = new ui::ScrollView();
+    scrollView->setPosition(0, 110);
+    scrollView->setSize(width, height - 120);
+    scrollView->setColor(0.8f, 0.8f, 0.8f, 0.0f);
+    scrollView->setContainerHeight(210 * 20 + 10);
     for (int i = 0; i < 20; i++)
     {
         ui::View* placeholder = new ui::View();
@@ -96,23 +109,6 @@ void onInit()
     }
 
     rootView->addChild(scrollView);
-
-    ui::EditTextView* entry = new ui::EditTextView();
-    entry->setPosition(0, height - 200);
-    entry->setSize(width, 200);
-    entry->setText("Hello!");
-    entry->setColor(0.96f, 0.18f, 0.43f, 0.4f);
-    entry->setColorText(0.0f, 0.0f, 0.0f, 1.0f);
-    entry->setFontAtlas(globalAtlas);
-
-    entry->setOnTouchDownListener([entry](float x, float y) {
-        if (!entry->isFocused()) 
-            entry->setFocused(true);
-        else 
-            entry->setFocused(false);
-    });
-
-    rootView->addChild(entry);
 }
 
 void onResize(int w, int h) 
@@ -124,15 +120,6 @@ void onResize(int w, int h)
     {
         rootView->setSize(width, height);
         rootView->setViewport(width, height);
-        
-        auto& children = rootView->getChildren();
-        if (children.size() > 1) {
-            children[1]->setSize(width, height - 320); // scrollView
-        }
-        if (children.size() > 2) {
-            children[2]->setPosition(0, height - 200); // entry
-            children[2]->setSize(width, 200);
-        }
     }
 }
 

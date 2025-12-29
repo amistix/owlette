@@ -46,6 +46,8 @@ void EditTextView::drawSelf() {
     if (!_text.empty() && _atlas) {
         drawText(_text, absX + 10, absY + 10, _text_r, _text_g, _text_b, _text_a, *_atlas);
     }
+
+    if(_focused) onFocused();
 }
 
 void EditTextView::openKeyboard() {
@@ -79,6 +81,12 @@ void EditTextView::openKeyboard() {
         env->ExceptionClear();
     }
 }
+
+void EditTextView::setOnFocusedListener(std::function<void()> f)
+{ _onFocusedFunc = f;}
+
+void EditTextView::onFocused()
+{if(_onFocusedFunc) _onFocusedFunc();}
 
 void EditTextView::closeKeyboard() {
     if (!g_vm || !g_activity) return;

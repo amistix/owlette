@@ -123,15 +123,12 @@ namespace ui
         _children.clear();
     }
 
-    void View::onTouchDown(float x, float y){
-        if (_onTouchDownFunc) _onTouchDownFunc(x, y);
-    };
-    void View::onTouchMove(float x, float y){
-        if (_onTouchMoveFunc) _onTouchMoveFunc(x, y);
-    };
-    void View::onTouchUp(float x, float y){
-        if (_onTouchUpFunc) _onTouchUpFunc(x, y);
-    };
+    void View::onTouchDown(float x, float y)
+    {if (_onTouchDownFunc) _onTouchDownFunc(x, y);};
+    void View::onTouchMove(float x, float y)
+    {if (_onTouchMoveFunc) _onTouchMoveFunc(x, y);};
+    void View::onTouchUp(float x, float y)
+    {if (_onTouchUpFunc) _onTouchUpFunc(x, y);};
 
     void View::setOnTouchDownListener(std::function<void(float, float)> f)
     { _onTouchDownFunc = f;}

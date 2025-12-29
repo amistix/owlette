@@ -6,27 +6,32 @@
 
 namespace ui {
 
-class EditTextView : public TextView {
-public:
-    EditTextView();  // Fixed: was EditText
-    ~EditTextView(); // Fixed: was ~EditText
+    class EditTextView : public TextView {
+    public:
+        EditTextView();  
+        ~EditTextView(); 
 
-    static EditTextView* getFocusedInstance()
-    { return _focusedInstance; }
+        static EditTextView* getFocusedInstance()
+        { return _focusedInstance; }
 
-    void setFocused(bool focused);
-    bool isFocused() const { return _focused; }
-    
-    void updateText(const std::string& text);
-    void openKeyboard();
-    void closeKeyboard();
-    
-    void update(float deltaTime);
-    void drawSelf() override;
-    
-private:
-    static EditTextView* _focusedInstance;
-    bool _focused = false;
-};
+        void setFocused(bool focused);
+        bool isFocused() const { return _focused; }
+        
+        void updateText(const std::string& text);
+        void openKeyboard();
+        void closeKeyboard();
 
-} // namespace ui
+        void setOnFocusedListener(std::function<void()> f);
+        void onFocused();
+        
+        void update(float deltaTime);
+        void drawSelf() override;
+        
+    private:
+        static EditTextView* _focusedInstance;
+        bool _focused = false;
+
+        std::function<void()> _onFocusedFunc;
+    };
+
+}
