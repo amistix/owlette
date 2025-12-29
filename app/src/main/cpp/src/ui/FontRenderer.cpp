@@ -199,7 +199,7 @@ void uploadFontTexture(FontAtlas& atlas) {
 void drawText(const std::string& text,
               float x, float y,
               float r, float g, float b, float a,
-              FontAtlas& atlas)
+              FontAtlas& atlas, ui::TextView* textView)
 {
     static bool loggedOnce = false;
     
@@ -267,6 +267,13 @@ void drawText(const std::string& text,
 
     int charCount = 0;
     for (char c : text) {
+        auto [textWidth, textHeight] = textView->getSize();
+
+        if (cx - x >= textWidth) {
+            cx = x;
+            cy += fontHeight;
+        }
+
         size_t idx = atlas.charset.find(c);
         if (idx == std::string::npos) {
             cx += atlas.fontSize * 0.5f;

@@ -24,6 +24,6 @@ namespace ui
         auto [absX, absY] = getAbsolutePosition();
 
         View::drawSelf();
-        if (_atlas) drawText(_text, absX, absY, _text_r, _text_g, _text_b, _text_a, *_atlas);
+        if (_atlas) drawText(_text, absX, absY, _text_r, _text_g, _text_b, _text_a, *_atlas, this);
     }
 }

@@ -41,6 +41,8 @@ namespace ui
         float getX();
         float getY();
 
+        std::pair<float, float> getSize();
+
         View* getParent();
         void addChild(View* childView);
         std::vector<View*>& getChildren();
