@@ -104,6 +104,8 @@ namespace ui
 
     void View::draw()
     {
+        if (!isShownOnScreen()) return;
+    
         drawSelf();
         for (View *child : _children)
         {
@@ -137,6 +139,15 @@ namespace ui
     { _onTouchUpFunc = f;}
     void View::setOnTouchMoveListener(std::function<void(float, float)> f)
     { _onTouchMoveFunc = f;}
+
+    bool View::isShownOnScreen()
+    {
+        auto [vw, vh] = getViewport();
+        auto [absX, absY] = getAbsolutePosition();
+
+        return absX + _width > 0  && absX < vw &&
+            absY + _height > 0 && absY < vh;
+    }
 
     View* View::hitTest(float x, float y) {
         for (auto it = _children.rbegin(); it != _children.rend(); ++it) {

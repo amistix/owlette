@@ -19,6 +19,8 @@ namespace ui
 
     void TextView::drawSelf() 
     {
+        if (!isShownOnScreen()) return;
+        
         auto [absX, absY] = getAbsolutePosition();
 
         View::drawSelf();

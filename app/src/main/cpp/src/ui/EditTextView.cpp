@@ -36,6 +36,7 @@ void EditTextView::updateText(const std::string& text) {
 }
 
 void EditTextView::drawSelf() {
+    if (!isShownOnScreen()) return;
     auto [absX, absY] = getAbsolutePosition();
     
     // Draw white background

@@ -36,6 +36,7 @@ namespace ui
         virtual View* hitTest(float x, float y);
 
         bool contains(float x, float y);
+        bool isShownOnScreen();
 
         float getX();
         float getY();
