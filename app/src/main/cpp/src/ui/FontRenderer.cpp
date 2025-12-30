@@ -227,17 +227,6 @@ void drawText(const std::string& text,
         return;
     }
 
-    // Log first call for debugging
-    if (!loggedOnce) {
-        loggedOnce = true;
-        LOGD("=== First drawText call ===");
-        LOGD("Text: '%s'", text.c_str());
-        LOGD("Position: (%.1f, %.1f)", x, y);
-        LOGD("Color: (%.2f, %.2f, %.2f, %.2f)", r, g, b, a);
-        LOGD("Atlas: %dx%d, texture ID: %d", atlas.textureWidth, atlas.textureHeight, atlas.fontTexture);
-        LOGD("Font size: %.1f", atlas.fontSize);
-    }
-
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -257,6 +246,7 @@ void drawText(const std::string& text,
     vertices.reserve(text.length() * 16);
     indices.reserve(text.length() * 6);
 
+    float startX = x;
     float cx = x;
     float cy = y;
     GLushort vertexIndex = 0;
@@ -265,37 +255,103 @@ void drawText(const std::string& text,
     float texWidth = float(atlas.textureWidth);
     float texHeight = float(atlas.textureHeight);
 
+    auto [textWidth, textHeight] = textView->getSize();
+    float maxX = x + textWidth - 10; 
+    
     int charCount = 0;
-    for (char c : text) {
-        auto [textWidth, textHeight] = textView->getSize();
+    
 
-        if (cx - x >= textWidth) {
-            cx = x;
-            cy += fontHeight;
+    std::vector<size_t> wordStarts;
+    std::vector<float> wordWidths;
+    size_t wordStart = 0;
+    float currentWordWidth = 0.0f;
+    
+    for (size_t i = 0; i < text.length(); i++) {
+        char c = text[i];
+        
+        if (c == ' ' || c == '\n' || i == text.length() - 1) {
+            if (i == text.length() - 1 && c != ' ' && c != '\n') {
+                size_t idx = atlas.charset.find(c);
+                if (idx != std::string::npos) {
+                    currentWordWidth += float(atlas.glyphW[idx]);
+                }
+                i++;
+            }
+            
+            if (currentWordWidth > 0) {
+                wordStarts.push_back(wordStart);
+                wordWidths.push_back(currentWordWidth);
+            }
+            
+            wordStart = i + 1;
+            currentWordWidth = 0.0f;
+            
+            if (c == '\n') {
+                wordStarts.push_back(i);
+                wordWidths.push_back(0.0f);
+            }
+        } else {
+            size_t idx = atlas.charset.find(c);
+            if (idx != std::string::npos) {
+                currentWordWidth += float(atlas.glyphW[idx]);
+            } else {
+                currentWordWidth += atlas.fontSize * 0.5f;
+            }
         }
-
+    }
+    
+    size_t currentWordIdx = 0;
+    
+    for (size_t i = 0; i < text.length(); i++) {
+        char c = text[i];
+        
+        if (currentWordIdx < wordStarts.size() && i == wordStarts[currentWordIdx]) {
+            float wordWidth = wordWidths[currentWordIdx];
+            
+            if (cx + wordWidth > maxX && cx > startX) {
+                cx = startX;
+                cy += fontHeight;
+            }
+            
+            currentWordIdx++;
+        }
+        
+        if (c == '\n') {
+            cx = startX;
+            cy += fontHeight;
+            continue;
+        }
+        
+        if (c == ' ') {
+            float spaceWidth = atlas.fontSize * 0.3f;
+            cx += spaceWidth;
+            continue;
+        }
+        
         size_t idx = atlas.charset.find(c);
         if (idx == std::string::npos) {
             cx += atlas.fontSize * 0.5f;
             continue;
         }
-
+        
         float gw = float(atlas.glyphW[idx]);
         float gx = float(atlas.glyphX[idx]);
+        
+        if (cy + fontHeight  < -200) continue; 
+        if (cy >= vh + 200) break;              
+        if (cx + gw < 0) continue;          
+        if (cx >= vw) continue;           
+        
+        if (cx + gw > x + textWidth) {
+            cx = startX;
+            cy += fontHeight;
+        }
 
-        // Calculate texture coordinates with proper precision
-        // Add small epsilon to avoid edge artifacts
-        float epsilon = 0.0f; // Can try 0.5f/texWidth if needed
-        float tx0 = (gx + epsilon) / texWidth;
-        float tx1 = (gx + gw - epsilon) / texWidth;
+        // Calculate texture coordinates
+        float tx0 = gx / texWidth;
+        float tx1 = (gx + gw) / texWidth;
         float ty0 = 0.0f;
         float ty1 = 1.0f;
-
-        if (!loggedOnce && charCount < 3) {
-            LOGD("Char '%c' [%d]:", c, charCount);
-            LOGD("  Glyph: x=%.1f w=%.1f", gx, gw);
-            LOGD("  TexCoord: x=(%.6f to %.6f) of %.1f", tx0, tx1, texWidth);
-        }
 
         // Screen quad in pixels
         float x0 = cx;
@@ -309,27 +365,20 @@ void drawText(const std::string& text,
         float ndcX1 = (x1 / vw) * 2.0f - 1.0f;
         float ndcY1 = 1.0f - (y1 / vh) * 2.0f;
 
-        if (!loggedOnce && charCount < 1) {
-            LOGD("  Screen: (%.1f,%.1f) to (%.1f,%.1f)", x0, y0, x1, y1);
-            LOGD("  NDC: (%.6f,%.6f) to (%.6f,%.6f)", ndcX0, ndcY0, ndcX1, ndcY1);
-        }
-
-        // Bottom-left
+        // Add vertices
         vertices.push_back(ndcX0); vertices.push_back(ndcY1);
         vertices.push_back(tx0); vertices.push_back(ty1);
         
-        // Bottom-right
         vertices.push_back(ndcX1); vertices.push_back(ndcY1);
         vertices.push_back(tx1); vertices.push_back(ty1);
         
-        // Top-right
         vertices.push_back(ndcX1); vertices.push_back(ndcY0);
         vertices.push_back(tx1); vertices.push_back(ty0);
         
-        // Top-left
         vertices.push_back(ndcX0); vertices.push_back(ndcY0);
         vertices.push_back(tx0); vertices.push_back(ty0);
 
+        // Add indices
         indices.push_back(vertexIndex + 0);
         indices.push_back(vertexIndex + 1);
         indices.push_back(vertexIndex + 2);
@@ -345,10 +394,7 @@ void drawText(const std::string& text,
 
     if (vertices.empty()) return;
 
-    if (!loggedOnce) {
-        LOGD("Generated %d chars, %zu vertices", charCount, vertices.size()/4);
-    }
-
+    // Upload and render
     glBindBuffer(GL_ARRAY_BUFFER, g_vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat),
                  vertices.data(), GL_DYNAMIC_DRAW);

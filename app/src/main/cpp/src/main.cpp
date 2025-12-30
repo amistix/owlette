@@ -74,17 +74,17 @@ void onInit()
     scrollView->setPosition(0, 110);
     scrollView->setSize(width, height - 120);
     scrollView->setColor(0.8f, 0.8f, 0.8f, 0.0f);
-    scrollView->setContainerHeight(210 * 20 + 10);
+    scrollView->setContainerHeight(410 * 20 + 10);
     for (int i = 0; i < 20; i++)
     {
         ui::View* placeholder = new ui::View();
-        placeholder->setPosition(10, 210 * i + 10);
-        placeholder->setSize(width - 20, 200);
+        placeholder->setPosition(10, 410 * i + 10);
+        placeholder->setSize(width - 20, 400);
         placeholder->setColor(0.5f, 0.5f, 0.5f, 1.0f);
 
         ui::TextView* content = new ui::TextView();
-        content->setPosition(50, 50);
-        content->setSize(width - 120, 200);
+        content->setPosition(10, 50);
+        content->setSize(width - 40, 300);
         content->setText("I2P (Invisible Internet Protocol) is a universal anonymous network layer. All communications over I2P are anonymous and end-to-end encrypted, participants don't reveal their real IP addresses. I2P client is a software used for building and using anonymous I2P networks. Such networks are commonly used for anonymous peer-to-peer applications (filesharing, cryptocurrencies) and anonymous client-server applications (websites, instant messengers, chat-servers).");
         content->setColor(0.0f, 0.0f, 0.0f, 0.0f);
         content->setColorText(0.0f, 0.0f, 0.0f, 1.0f);
