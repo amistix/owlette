@@ -44,7 +44,7 @@ void EditTextView::drawSelf() {
     
     // Draw black text
     if (!_text.empty() && _atlas) {
-        drawText(_text, absX + 10, absY + 10, _text_r, _text_g, _text_b, _text_a, *_atlas);
+        drawText(_text, absX + 10, absY + 10, _text_r, _text_g, _text_b, _text_a, *_atlas, this);
     }
 
     if(_focused) onFocused();

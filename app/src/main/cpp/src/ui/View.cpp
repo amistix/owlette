@@ -10,15 +10,11 @@ namespace ui
     float View::getX(){return _x;}
     float View::getY(){return _y;}
 
-    View* View::getParent()
-    {
-        return _parent;
-    }
+    std::pair<float, float> View::getSize() {return {_width, _height};}
 
-    std::vector<View*>& View::getChildren()
-    {
-        return _children;
-    }
+    View* View::getParent(){return _parent;}
+
+    std::vector<View*>& View::getChildren(){return _children;}
 
     std::pair<int, int> View::getViewport()
     {
