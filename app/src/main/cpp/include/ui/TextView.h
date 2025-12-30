@@ -13,14 +13,14 @@ namespace ui
         ~TextView ();
 
         void setText(const std::string& text);
-        void setColorText(float r, float g, float b, float a);
+        void setColorText(vec4<float> color);
         void setFontAtlas(FontAtlas* atlas);
 
         virtual void drawSelf() override;
 
     protected:
         std::string _text = "Hello, Owlette!";
-        float _text_r = 1.0f, _text_g = 1.0f, _text_b = 1.0f, _text_a = 1.0f;
+        vec4<float> _text_color;
         FontAtlas* _atlas;
     };
     

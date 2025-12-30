@@ -10,12 +10,12 @@ namespace ui
         ScrollView ();
         ~ScrollView ();
 
-        void focus(float x, float y);
-        void unfocus(float x, float y);
-        void scroll(float x, float y);
+        void focus(vec2<float> pos);
+        void unfocus(vec2<float> pos);
+        void scroll(vec2<float> pos);
 
         virtual void draw() override;
-        virtual ui::View* hitTest(float x, float y) override;
+        virtual ui::View* hitTest(vec2<float> position) override;
 
         void setContainerHeight(float height);
 

@@ -7,19 +7,18 @@ namespace ui
 
     View::~View() {}
 
-    float View::getX(){return _x;}
-    float View::getY(){return _y;}
+    vec2<float> View::getPosition() {return _pos;}
 
-    std::pair<float, float> View::getSize() {return {_width, _height};}
+    vec2<float> View::getSize() {return _size;}
 
-    View* View::getParent(){return _parent;}
+    View* View::getParent() {return _parent;}
 
-    std::vector<View*>& View::getChildren(){return _children;}
+    std::vector<View*>& View::getChildren() {return _children;}
 
-    std::pair<int, int> View::getViewport()
+    vec2<float> View::getViewport()
     {
         if (_parent) return _parent->getViewport();
-        return {_viewportW, _viewportH};   
+        return _viewport;   
     }
 
     void View::addChild(View* childView)
@@ -28,55 +27,46 @@ namespace ui
         childView->_parent = this;
     }
 
-    void View::setSize(int width, int height)
+    void View::setSize(vec2<float> size)
     {
-        _width = width;
-        _height = height;
+        _size = size;
     }
 
-    void View::setColor(float r, float g, float b, float a)
+    void View::setColor(vec4<float> color)
     {
-        _r = r; _g = g; _b = b; _a = a;
+        _color = color;
     }
 
-    void View::setPosition(int x, int y)
+    void View::setPosition(vec2<float> pos)
     {
-        _x = x; _y = y;
+        _pos = pos;
     }
 
-    void View::setViewport(int w, int h)
+    void View::setViewport(vec2<float> viewportSize)
     {
-        _viewportW = w; _viewportH = h;
+        _viewport = viewportSize;
     }
 
-    std::pair<int,int> View::getAbsolutePosition(int ownerX, int ownerY)
+    vec2<float> View::getAbsolutePosition(vec2<float> ownerPosition)
     {
-        int absX = ownerX + _x;
-        int absY = ownerY + _y;
+        vec2<float> absPos = _pos + ownerPosition;
 
-        if (_parent)
-        {
-            return _parent->getAbsolutePosition(absX, absY);
-        }
-        else
-        {
-            return {absX, absY};
-        }
+        if (_parent) return _parent->getAbsolutePosition(absPos);
+        else return absPos;
     }
 
     void View::drawSelf()
     {
         glUseProgram(getRectProgram());
 
-        auto [vw, vh] = getViewport();
-
-        auto [absX, absY] = getAbsolutePosition();
+        vec2<float> viewPortSize = getViewport();
+        vec2<float> absPos = getAbsolutePosition();
 
         // Convert pixel coordinates → OpenGL (-1 to 1)
-        float xNorm = ( (float)absX    / vw ) * 2.0f - 1.0f;
-        float yNorm = ( (float)absY    / vh ) * -2.0f + 1.0f;
-        float wNorm = ( (float)_width  / vw ) * 2.0f;
-        float hNorm = ( (float)_height / vh ) * -2.0f;
+        float xNorm = ( absPos.x / viewPortSize.x ) * 2.0f - 1.0f;
+        float yNorm = ( absPos.y / viewPortSize.y ) * -2.0f + 1.0f;
+        float wNorm = ( _size.x  / viewPortSize.x ) * 2.0f;
+        float hNorm = ( _size.y  / viewPortSize.y ) * -2.0f;
 
         GLfloat verts[] =
         {
@@ -88,7 +78,7 @@ namespace ui
 
         glUniform2f(getOffsetLoc(), xNorm, yNorm);
         glUniform2f(getSizeLoc(),   wNorm, hNorm);
-        glUniform4f(getColorLoc(),  _r, _g, _b, _a);
+        glUniform4f(getColorLoc(),  _color.x, _color.y, _color.z, _color.w);
 
         glEnableVertexAttribArray(getPosLoc());
         glVertexAttribPointer(getPosLoc(), 2, GL_FLOAT, GL_FALSE, 0, verts);
@@ -119,49 +109,51 @@ namespace ui
         _children.clear();
     }
 
-    void View::onTouchDown(float x, float y)
-    {if (_onTouchDownFunc) _onTouchDownFunc(x, y);};
-    void View::onTouchMove(float x, float y)
-    {if (_onTouchMoveFunc) _onTouchMoveFunc(x, y);};
-    void View::onTouchUp(float x, float y)
-    {if (_onTouchUpFunc) _onTouchUpFunc(x, y);};
+    void View::onTouchDown(vec2<float> eventPosition)
+    {if (_onTouchDownFunc) _onTouchDownFunc(eventPosition);};
+    void View::onTouchMove(vec2<float> eventPosition)
+    {if (_onTouchMoveFunc) _onTouchMoveFunc(eventPosition);};
+    void View::onTouchUp(vec2<float> eventPosition)
+    {if (_onTouchUpFunc) _onTouchUpFunc(eventPosition);};
 
-    void View::setOnTouchDownListener(std::function<void(float, float)> f)
+    void View::setOnTouchDownListener(std::function<void(vec2<float>)> f)
     { _onTouchDownFunc = f;}
-    void View::setOnTouchUpListener(std::function<void(float, float)> f)
+    void View::setOnTouchUpListener(std::function<void(vec2<float>)> f)
     { _onTouchUpFunc = f;}
-    void View::setOnTouchMoveListener(std::function<void(float, float)> f)
+    void View::setOnTouchMoveListener(std::function<void(vec2<float>)> f)
     { _onTouchMoveFunc = f;}
 
     bool View::isShownOnScreen()
     {
-        auto [vw, vh] = getViewport();
-        auto [absX, absY] = getAbsolutePosition();
+        vec2<float> viewPortSize = getViewport();
+        vec2<float> absPos = getAbsolutePosition();
 
-        return absX + _width > 0  && absX < vw &&
-            absY + _height > 0 && absY < vh;
+        return absPos.x + _size.x > 0 && absPos.x < viewPortSize.x &&
+               absPos.y + _size.y > 0 && absPos.y < viewPortSize.y;
     }
 
-    View* View::hitTest(float x, float y) {
+    View* View::hitTest(vec2<float> position) 
+    {
         for (auto it = _children.rbegin(); it != _children.rend(); ++it) {
             View* child = *it;
-            if (child->contains(x, y) && child->isHittable()) {
-                View* deeper = child->hitTest(x, y);
+
+            if (child->contains(position) && child->isHittable()) {
+                View* deeper = child->hitTest(position);
                 return deeper ? deeper : child;
             }
         }
 
-        return contains(x, y) ? this : nullptr;
+        return contains(position) ? this : nullptr;
     }
 
-    void View::setHittable(bool state) {
-        _hittable = state;
-    }
+    void View::setHittable(bool state) {_hittable = state;}
 
-    bool View::contains(float x, float y) {
-        auto [absX, absY] = getAbsolutePosition();
-        return x >= absX && x <= absX + _width &&
-            y >= absY && y <= absY + _height;
+    bool View::contains(vec2<float> hitPointPosition) 
+    {
+        vec2<float> absPos = getAbsolutePosition();
+
+        return hitPointPosition.x >= absPos.x && hitPointPosition.x <= absPos.x + _size.x &&
+               hitPointPosition.y >= absPos.y && hitPointPosition.y <= absPos.y + _size.y;
     }
     
 }
