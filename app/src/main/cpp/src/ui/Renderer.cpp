@@ -40,13 +40,14 @@ void initRectShader()
     sizeLoc   = glGetUniformLocation(rectProgram, "uSize");
     colorLoc  = glGetUniformLocation(rectProgram, "uColor");
 
-    glDeleteShader(vs); // optional cleanup
+    glDeleteShader(vs);
     glDeleteShader(fs);
 }
 
 void destroyGLResources()
 {
-    if (rectProgram != 0) {
+    if (rectProgram != 0) 
+    {
         glDeleteProgram(rectProgram);
         rectProgram = 0;
         posLoc = colorLoc = sizeLoc = offsetLoc = -1;

@@ -1,6 +1,7 @@
 #include "Streaming.h"
 #include "Destination.h"
 #include "Identity.h"
+#include <chrono>
 #include "ClientContext.h"
 #include <android/log.h>
 #include <memory>
@@ -33,6 +34,7 @@ std::string startDestinationClient() {
         LOGI("Created destination (base32): %s", base32.c_str());
         LOGI("Created destination (base64): %s", identity.substr(0, 50).c_str());
         LOGI("Full length: %zu characters", identity.length());
+        LOGI("Full base64: %s", identity.c_str());
         
         // IMPORTANT: Run each connection in its own thread!
         localDest->AcceptStreams([localDest](std::shared_ptr<i2p::stream::Stream> stream) {
@@ -111,6 +113,16 @@ bool connectToDestination(const std::string& remoteDestBase64) {
         if (!g_localDest) {
             LOGE("Local destination not created yet!");
             return false;
+        }
+
+        LOGI("Waiting for tunnels to be ready...");
+        int attempts = 0;
+        while (!g_localDest->IsReady() && attempts < 60) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            attempts++;
+            if (attempts % 5 == 0) {
+                LOGI("Still waiting for tunnels... (%d/60)", attempts);
+            }
         }
         
         LOGI("Connecting to: %s", remoteDestBase64.substr(0, 50).c_str());

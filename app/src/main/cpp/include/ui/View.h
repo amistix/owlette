@@ -4,6 +4,9 @@
 #include <functional>
 #include <utility> 
 
+#include "extra/vec2.h"
+#include "extra/vec4.h"
+
 namespace ui 
 {
     class View
@@ -12,53 +15,59 @@ namespace ui
         View ();
         ~View ();
 
-        void setColor(float r, float g, float b, float a);
-        void setSize(int width, int height);
-        void setPosition(int x, int y);
+        void setColor(vec4<float> color);
 
-        void setViewport(int w, int h);
-        std::pair<int,int> getViewport();
+        void setSize(vec2<float> size);
+        void setPosition(vec2<float> position);
+
+        void setViewport(vec2<float> viewportSize);
+        vec2<float> getViewport();
         
         virtual void draw();
         virtual void destroy();
         virtual void drawSelf();
 
-        std::pair<int,int> getAbsolutePosition(int ownerX = 0, int ownerY = 0);
+        vec2<float> getAbsolutePosition(vec2<float> ownerPosition = vec2<float>{0,0});
 
-        void onTouchDown(float x, float y);
-        void onTouchMove(float x, float y);
-        void onTouchUp(float x, float y);
+        void onTouchDown(vec2<float> eventPosition);
+        void onTouchMove(vec2<float> eventPosition);
+        void onTouchUp(vec2<float> eventPosition);
 
-        void setOnTouchUpListener(std::function<void(float, float)> f);
-        void setOnTouchDownListener(std::function<void(float, float)> f);
-        void setOnTouchMoveListener(std::function<void(float, float)> f);
+        void setOnTouchUpListener(std::function<void(vec2<float>)> f);
+        void setOnTouchDownListener(std::function<void(vec2<float>)> f);
+        void setOnTouchMoveListener(std::function<void(vec2<float>)> f);
 
-        virtual View* hitTest(float x, float y);
+        virtual View* hitTest(vec2<float> position);
+        bool isHittable() {return _hittable;}
 
-        bool contains(float x, float y);
+        void setHittable(bool state);
+
+        bool contains(vec2<float> hitPointPosition);
         bool isShownOnScreen();
 
-        float getX();
-        float getY();
+        vec2<float> getPosition();
 
-        std::pair<float, float> getSize();
+        vec2<float> getSize();
 
         View* getParent();
         void addChild(View* childView);
         std::vector<View*>& getChildren();
 
     protected:
-        int _width, _height;
-        int _y, _x;
-        float _r, _g, _b, _a;
+        vec2<float> _size;
+        vec2<float> _pos;
 
-        std::function<void(float, float)> _onTouchDownFunc,
+        vec4<float> _color;
+
+        bool _hittable = true;
+
+        std::function<void(vec2<float>)> _onTouchDownFunc,
             _onTouchUpFunc, _onTouchMoveFunc;
         
         View* _parent = nullptr;
         std::vector<View*> _children;
 
-        int _viewportW, _viewportH;
+        vec2<float> _viewport;
 
     };
 }

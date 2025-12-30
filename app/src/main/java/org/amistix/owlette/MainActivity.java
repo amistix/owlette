@@ -10,7 +10,12 @@ import android.content.Context;
 
 public class MainActivity extends AppCompatActivity {
 
+    static {
+        System.loadLibrary("native-lib");
+    }
+    
     private GLView glView;
+    private native void nativeShutdown();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        if (isFinishing()) {
+            nativeShutdown();
+        }
         glView.release();
         super.onDestroy();
     }

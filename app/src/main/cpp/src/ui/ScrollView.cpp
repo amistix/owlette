@@ -2,95 +2,92 @@
 #include <algorithm>
 #include <cmath>
 
-namespace ui {
+namespace ui 
+{
 
     ScrollView::ScrollView() {}
     ScrollView::~ScrollView() {}
 
-    void ScrollView::setContainerHeight(float height)
+    void ScrollView::setContainerHeight(float height) {_containerHeight = height;}
+
+    void ScrollView::focus(vec2<float> pos) 
     {
-        _containerHeight = height;
-    }
-
-    void ScrollView::focus(float x, float y) {
         _dragging = true;
-        _lastTouchY = y;
-        _velocityY = 0;  // Reset velocity when starting drag
+        _lastTouchY = pos.y;
+        _velocityY = 0; 
     }
 
-    void ScrollView::scroll(float x, float y) {
+    void ScrollView::scroll(vec2<float> pos) 
+    {
         if (!_dragging) return;
 
-        float deltaY = y - _lastTouchY;
-        _lastTouchY = y;
+        float deltaY = pos.y - _lastTouchY;
+        _lastTouchY = pos.y;
 
         _scrollY += deltaY;
         
-        // Smooth velocity: blend current delta with previous velocity
         _velocityY = _velocityY * 0.7f + deltaY * 0.3f;
 
         // clamp scroll range
-        float minScroll = _height - _containerHeight;
+        float minScroll = _size.y - _containerHeight;
         float maxScroll = 0.0f;
         _scrollY = std::clamp(_scrollY, minScroll, maxScroll);
     }
 
-    void ScrollView::unfocus(float x, float y) {
-        _dragging = false;
-    }
+    void ScrollView::unfocus(vec2<float> pos) {_dragging = false;}
 
     void ScrollView::draw() 
     {
-        if (!_dragging && std::abs(_velocityY) > 0.5f) {  // Higher threshold
+        if (!_dragging && std::abs(_velocityY) > 0.5f) {
             _scrollY += _velocityY;
 
-            // clamp scroll range
-            float minScroll = _height - _containerHeight;
+            float minScroll = _size.y - _containerHeight;
             float maxScroll = 0.0f;
 
-            if (_scrollY < minScroll) {
+            if (_scrollY < minScroll) 
+            {
                 _scrollY = minScroll;
                 _velocityY = 0;
-            } else if (_scrollY > maxScroll) {
+            } else if (_scrollY > maxScroll) 
+            {
                 _scrollY = maxScroll;
                 _velocityY = 0;
-            } else {
-                _velocityY *= 0.95f;  // Stronger friction (was 0.9)
-            }
-        } else if (!_dragging) {
-            _velocityY = 0;  // Stop completely when velocity is too low
-        }
+            } else _velocityY *= 0.95f; 
+        } 
+        else if (!_dragging) _velocityY = 0; 
         
-        auto[vw, vh] = getViewport();
+        vec2<float> viewPortSize = getViewport();
 
-        int px = _x;
-        int py = vh - (_y + _height);     
+        float px = _pos.x;
+        float py = viewPortSize.y - (_pos.y + _size.y);
+
         glEnable(GL_SCISSOR_TEST);
-        glScissor(px, py, _width, _height);
+        glScissor(px, py, _size.x, _size.y);
 
         drawSelf();
 
         for (View* child : _children) {
-            int old_y = child->getY();
-            child->setPosition(child->getX(), old_y + _scrollY);
+            vec2<float> oldPos = child->getSize();
+            child->setPosition(vec2<float>{oldPos.x, oldPos.y + _scrollY});
             child->draw();
-            child->setPosition(child->getX(), old_y);
+            child->setPosition(vec2<float>{oldPos.x, oldPos.y});
         }
 
         glDisable(GL_SCISSOR_TEST);
     }
 
-    View* ScrollView::hitTest(float x, float y) {
-        float adjustedY = y - _scrollY;
+    View* ScrollView::hitTest(vec2<float> position) 
+    {
+        float adjustedY = position.y - _scrollY;
         
         for (auto it = _children.rbegin(); it != _children.rend(); ++it) {
             View* child = *it;
             
-            if (child->contains(x, y - _scrollY)) {
-                View* deeper = child->hitTest(x, adjustedY);
+            if (child->contains(vec2<float>{position.x, position.y - _scrollY})) {
+                View* deeper = child->hitTest(vec2<float>{position.x, adjustedY});
                 return deeper ? deeper : child;
             }
         }
-        return contains(x, y) ? this : nullptr;
+        return contains(position) ? this : nullptr;
     }
 }
