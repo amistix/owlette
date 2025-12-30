@@ -13,6 +13,9 @@
 
 #include "ui/EditTextView.h"
 
+#include <chrono>
+#include "animation/Animator.h"
+
 #include "main.h"
 
 GLint width, height;
@@ -21,6 +24,8 @@ JavaVM* g_vm = nullptr;
 jobject g_activity = nullptr;
 
 i2p::I2pdManager* i2pdManager = nullptr;
+
+static auto lastTime = std::chrono::steady_clock::now();
 
 static JNIEnv* getEnv() 
 {
@@ -84,6 +89,11 @@ Java_org_amistix_owlette_GLView_nativeResize(JNIEnv*, jclass, jint width, jint h
 extern "C" JNIEXPORT void JNICALL
 Java_org_amistix_owlette_GLView_nativeDraw(JNIEnv*, jclass) 
 {
+    auto now = std::chrono::steady_clock::now();
+    float deltaTime = std::chrono::duration<float>(now - lastTime).count();
+    lastTime = now;
+    
+    animation::Animator::update(deltaTime);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     onDraw();
 }

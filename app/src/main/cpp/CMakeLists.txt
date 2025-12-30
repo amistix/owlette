@@ -122,6 +122,7 @@ add_library(native-lib SHARED
     src/ui/FontGlobals.cpp
 
     src/input/Dispatcher.cpp
+    src/animation/Animator.cpp
 
     src/storage/AppStorageManager.cpp
 )
