@@ -90,13 +90,16 @@ Java_org_amistix_owlette_GLView_nativeDraw(JNIEnv*, jclass) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_org_amistix_owlette_GLView_nativeDestroy(JNIEnv* env, jclass) {
-    if (i2pdManager)
-    { 
+Java_org_amistix_owlette_MainActivity_nativeShutdown(JNIEnv* env, jclass) {
+    if (i2pdManager) { 
         i2pdManager->shutdown();
         delete i2pdManager;
         i2pdManager = nullptr;
     }
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_org_amistix_owlette_GLView_nativeDestroy(JNIEnv* env, jclass) {
     onDestroy();
 }
 
