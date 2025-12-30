@@ -64,9 +64,37 @@ void onInit()
         float elapsed = std::chrono::duration<float>(currentTime - startTime).count();
         topBar->setColor(sin(elapsed), sin(elapsed + 1.6), sin(elapsed + 3.14), 1.0f);
     });
+
+    ui::View* buttonViewBase = new ui::View();
+    buttonViewBase->setPosition(width - 120, 0);
+    buttonViewBase->setSize(100, 100);
+    buttonViewBase->setColor(224.0f/255.0f, 25.0f/255.0f, 78.0f/255.0f, 1.0f);
+
+    ui::View* buttonViewElement1  = new ui::View();
+    buttonViewElement1->setPosition(45, 15);
+    buttonViewElement1->setSize(10, 70);
+    buttonViewElement1->setColor(1.0f, 1.0f, 1.0f, 1.0f);
+    buttonViewElement1->setHittable(false);
+
+    ui::View* buttonViewElement2  = new ui::View();
+    buttonViewElement2->setPosition(15, 45);
+    buttonViewElement2->setSize(70, 10);
+    buttonViewElement2->setColor(1.0f, 1.0f, 1.0f, 1.0f);
+    buttonViewElement2->setHittable(false);
+
+    buttonViewBase->addChild(buttonViewElement1);
+    buttonViewBase->addChild(buttonViewElement2);
+
+    buttonViewBase->setOnTouchDownListener([buttonViewBase](float x, float y) {
+        buttonViewBase->setColor(199.0f/255.0f, 0.0f/255.0f, 53.0f/255.0f, 1.0f);
+    });
+     buttonViewBase->setOnTouchUpListener([buttonViewBase](float x, float y) {
+        buttonViewBase->setColor(224.0f/255.0f, 25.0f/255.0f, 78.0f/255.0f, 1.0f);
+    });
     
     
     topBar->addChild(title);
+    topBar->addChild(buttonViewBase);
     rootView->addChild(topBar);
     
 
@@ -89,6 +117,7 @@ void onInit()
         content->setColor(0.0f, 0.0f, 0.0f, 0.0f);
         content->setColorText(0.0f, 0.0f, 0.0f, 1.0f);
         content->setFontAtlas(globalAtlas);
+        content->setHittable(false);
 
         placeholder->addChild(content);
         scrollView->addChild(placeholder);

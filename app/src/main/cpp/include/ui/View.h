@@ -34,6 +34,9 @@ namespace ui
         void setOnTouchMoveListener(std::function<void(float, float)> f);
 
         virtual View* hitTest(float x, float y);
+        bool isHittable() {return _hittable;}
+
+        void setHittable(bool state);
 
         bool contains(float x, float y);
         bool isShownOnScreen();
@@ -51,6 +54,8 @@ namespace ui
         int _width, _height;
         int _y, _x;
         float _r, _g, _b, _a;
+
+        bool _hittable = true;
 
         std::function<void(float, float)> _onTouchDownFunc,
             _onTouchUpFunc, _onTouchMoveFunc;

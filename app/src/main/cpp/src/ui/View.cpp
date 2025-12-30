@@ -145,13 +145,17 @@ namespace ui
     View* View::hitTest(float x, float y) {
         for (auto it = _children.rbegin(); it != _children.rend(); ++it) {
             View* child = *it;
-            if (child->contains(x, y)) {
+            if (child->contains(x, y) && child->isHittable()) {
                 View* deeper = child->hitTest(x, y);
                 return deeper ? deeper : child;
             }
         }
 
         return contains(x, y) ? this : nullptr;
+    }
+
+    void View::setHittable(bool state) {
+        _hittable = state;
     }
 
     bool View::contains(float x, float y) {

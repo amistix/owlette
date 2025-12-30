@@ -41,6 +41,7 @@ namespace i2p
             this->initialize();
             this->daemon->start();
             startDestinationClient();
+            // connectToDestination("");
         });
     }
 
