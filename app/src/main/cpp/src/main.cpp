@@ -57,8 +57,8 @@ void onInit()
     title->setColor(vec4<float>(1.0f, 1.0f, 1.0f, 0.0f));
     title->setColorText(vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
     title->setSize(vec2<float>(width * 0.7f, height * 0.05f));
-    title->setText("Owlette");
-    title->setFontAtlas(largeAtlas);
+    title->setText("Loading...");
+    title->setFontAtlas(bigAtlas);
 
     topBar->addChild(title);
     rootView->addChild(topBar);
@@ -122,11 +122,6 @@ void onInit()
         *(entry->getFontAtlas())
     );
 
-    for (int i = 0; i < 10; i++)
-    {
-        attachMessage("theownerofthisworld", "hello", false);
-    }
-    
     entry->setPosition(vec2<float>((height * 0.065f - metricsEntry.height) / 2, (height * 0.065f - metricsEntry.height) / 2));
     
     entryBar->setOnTouchDownListener([entry](vec2<float> eventPosition)
@@ -141,6 +136,7 @@ void onInit()
     
     entryButtonSend->setOnTouchUpListener([entryButtonSend, entry](vec2<float> eventPosition)
     {
+        if(entry->getText().empty()) return;
         attachMessage("You", entry->getText(), true);
         entry->clearText();
         entryButtonSend->setColor(vec4<float>(224.0f/255.0f, 25.0f/255.0f, 78.0f/255.0f, 1.0f));
@@ -150,42 +146,6 @@ void onInit()
     entryButtonSend->addChild(entryButtonSendIcon);
     entryBar->addChild(entryButtonSend);
     rootView->addChild(entryBar);
-    
-    // ui::TextView* greatingsText = new ui::TextView();
-    // greatingsText->setPosition(vec2<float>(20, 0));
-    // greatingsText->setText("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
-    // greatingsText->setFontAtlas(mediumAtlas);
-    
-    // TextMetrics metrics = measureTextWrapped(
-        //     greatingsText->getText(),
-        //     width - 40.0f,  
-        //     *(greatingsText->getFontAtlas())
-        // );
-        
-        // greatingsText->setSize(vec2<float>(width - 40.0f, metrics.height));
-    
-    // greatingsText->setColor(vec4<float>{0.0f, 0.0f, 0.0f, 0.0f});
-    // greatingsText->setColorText(vec4<float>{0.0f, 0.0f, 0.0f, 1.0f});
-
-    // animation::Animator::animatePosition(greatingsText,
-    //     vec2<float>(20, 0), vec2<float>(20, height / 2 - 30),
-    //     [](float t)
-    //     {
-    //         double k = 10.0;  // steepness (change if needed)
-    //         return (tanh(k * (t - 0.5)) + tanh(k / 2.0)) / (2.0 * tanh(k / 2.0));
-    //     }, 3.0f
-    // );
-
-    // animation::Animator::animateColor(greatingsText,
-    //     vec4<float>(0.0f, 0.0f, 0.0f, 0.0f), vec4<float>(0.0f, 0.0f, 0.0f, 0.5f),
-    //     [](float t)
-    //     {
-    //         double k = 10.0;  // steepness (change if needed)
-    //         return (tanh(k * (t - 0.5)) + tanh(k / 2.0)) / (2.0 * tanh(k / 2.0));
-    //     }, 3.0f
-    // );
-
-    // rootView->addChild(greatingsText);
 }
 
 void attachMessage(const std::string& authorName, const std::string& text, bool ownMessage)

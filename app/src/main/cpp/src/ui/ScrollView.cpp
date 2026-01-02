@@ -95,11 +95,12 @@ namespace ui
 
     void ScrollView::setScrollValue(float x)
     {
+        x = std::clamp(x, 0.0f, 1.0f);
         _scrollY = x * (_size.y - _containerHeight);
     }
 
     float ScrollView::getScrollValue()
     {
-        return _scrollY / (_size.y - _containerHeight);
+        return std::clamp(_scrollY / (_size.y - _containerHeight), 0.0f, 1.0f);
     }
 }
