@@ -112,12 +112,12 @@ void onInit()
     entry->setColor(vec4<float>(1.0f, 1.0f, 1.0f, 0.0f));
     entry->setColorText(vec4<float>(0.0f, 0.0f, 0.0f, 1.0f));
     entry->setSize(vec2<float>(width * 1.0f - 60.0f, height * 0.065f - 60.0f));
-    entry->setText("Type message");
+    entry->clearText();
     entry->setHittable(false);
     entry->setFontAtlas(mediumAtlas);
     
     TextMetrics metricsEntry = measureTextWrapped(
-        entry->getText(),
+        (entry->getText().empty()) ? "Type here" : entry->getText(),
         width - height * 0.065f,  
         *(entry->getFontAtlas())
     );

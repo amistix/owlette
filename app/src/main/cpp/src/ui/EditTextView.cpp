@@ -68,11 +68,15 @@ void EditTextView::drawSelf()
     vec2<float> absPos = getAbsolutePosition();
     
     View::drawSelf();
+
+    if (!_atlas) return;
+
     
-    if (!_text.empty() && _atlas) 
+    if (!_text.empty()) 
     {
         drawText(_text, absPos.x, absPos.y, _text_color.x, _text_color.y, _text_color.z, _text_color.w, *_atlas, this);
     }
+    else drawText("Type here", absPos.x, absPos.y, 0.2f, 0.2f, 0.3f, 0.8f, *_atlas, this);
 
     if(_focused) onFocused();
 }
