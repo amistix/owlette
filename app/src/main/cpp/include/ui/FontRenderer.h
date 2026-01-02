@@ -3,6 +3,14 @@
 #include "ui/TextView.h"
 #include <GLES2/gl2.h>
 
+struct TextMetrics {
+    float width;
+    float height;
+    int lineCount;
+};
+
+TextMetrics measureTextWrapped(const std::string& text, float maxWidth, const FontAtlas& atlas);
+
 struct FontAtlas;
 
 void initFontRenderer();

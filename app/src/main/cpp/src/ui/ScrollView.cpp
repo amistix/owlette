@@ -9,6 +9,7 @@ namespace ui
     ScrollView::~ScrollView() {}
 
     void ScrollView::setContainerHeight(float height) {_containerHeight = height;}
+    float ScrollView::getContainerHeight() {return _containerHeight;}
 
     void ScrollView::focus(vec2<float> pos) 
     {
@@ -20,6 +21,7 @@ namespace ui
     void ScrollView::scroll(vec2<float> pos) 
     {
         if (!_dragging) return;
+        if (_containerHeight < _size.y) return;
 
         float deltaY = pos.y - _lastTouchY;
         _lastTouchY = pos.y;
@@ -67,7 +69,7 @@ namespace ui
         drawSelf();
 
         for (View* child : _children) {
-            vec2<float> oldPos = child->getSize();
+            vec2<float> oldPos = child->getPosition();
             child->setPosition(vec2<float>{oldPos.x, oldPos.y + _scrollY});
             child->draw();
             child->setPosition(vec2<float>{oldPos.x, oldPos.y});
@@ -89,5 +91,15 @@ namespace ui
             }
         }
         return contains(position) ? this : nullptr;
+    }
+
+    void ScrollView::setScrollValue(float x)
+    {
+        _scrollY = x * (_size.y - _containerHeight);
+    }
+
+    float ScrollView::getScrollValue()
+    {
+        return _scrollY / (_size.y - _containerHeight);
     }
 }

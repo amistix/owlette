@@ -14,6 +14,8 @@ namespace ui {
         static EditTextView* getFocusedInstance()
         { return _focusedInstance; }
 
+        void clearText();
+
         void setFocused(bool focused);
         bool isFocused() const { return _focused; }
         

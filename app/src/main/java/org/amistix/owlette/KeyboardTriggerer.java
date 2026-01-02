@@ -6,6 +6,7 @@ import android.widget.FrameLayout;
 import android.widget.EditText;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 
 import android.view.inputmethod.InputMethodManager;
 
@@ -17,6 +18,7 @@ public class KeyboardTriggerer extends EditText {
         
     private native void nativeOnTextChanged(String text);
     private native void nativeGetKeyboardTriggerer();
+    
 
     public KeyboardTriggerer(Context context) {
         super(context);
@@ -38,6 +40,11 @@ public class KeyboardTriggerer extends EditText {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
+    }
+
+    public void clearText()
+    {
+        setText("");
     }
 
     public void showKeyboard(String initialText) {

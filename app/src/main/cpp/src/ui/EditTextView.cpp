@@ -13,6 +13,8 @@ EditTextView::EditTextView() {}
 
 EditTextView::~EditTextView() {}
 
+
+
 void EditTextView::setFocused(bool focused) 
 {
     _focused = focused;
@@ -30,6 +32,35 @@ void EditTextView::setFocused(bool focused)
 }
 
 void EditTextView::updateText(const std::string& text) {setText(text);}
+
+void EditTextView::clearText()
+{
+    if (!g_vm || !g_activity) return;
+
+    JNIEnv* env = nullptr;
+    g_vm->GetEnv((void**)&env, JNI_VERSION_1_6);
+
+    jclass cls = env->GetObjectClass(g_activity);
+    if (!cls) return;
+    
+
+    jmethodID mid = env->GetMethodID(cls, "clearText", "()V");
+    if (!mid) 
+    {
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+        return;
+    }
+
+    env->CallVoidMethod(g_activity, mid);
+    
+    if (env->ExceptionCheck()) 
+    {
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+    }
+    _text = "";
+}
 
 void EditTextView::drawSelf()
 {

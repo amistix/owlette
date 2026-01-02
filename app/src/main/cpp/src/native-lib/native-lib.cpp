@@ -48,6 +48,13 @@ Java_org_amistix_owlette_KeyboardTriggerer_nativeGetKeyboardTriggerer(JNIEnv* en
 }
 
 extern "C" JNIEXPORT void JNICALL
+Java_org_amistix_owlette_MainActivity_nativeOnKeyboardVisibilityChanged(
+    JNIEnv* env, jobject obj, jint visibleHeight, jint keyboardHeight)
+{
+    onKeyboardOpen(visibleHeight);
+}
+
+extern "C" JNIEXPORT void JNICALL
 Java_org_amistix_owlette_GLView_nativeInit(JNIEnv* env, jobject obj) 
 {
 
