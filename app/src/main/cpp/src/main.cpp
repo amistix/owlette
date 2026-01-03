@@ -108,7 +108,7 @@ void onInit()
     ui::ScrollView* chatScrollView = new ui::ScrollView();
     chatScrollView->setPosition(vec2<float>(vec2<float>{0.0f, height * 0.065f}));
     chatScrollView->setSize(vec2<float>{width * 1.0f, height * 0.87f});
-    chatScrollView->setColor(vec4<float>(0.5f, 0.5f, 1.0f, 0.5f));
+    chatScrollView->setColor(vec4<float>(249.0f / 255.0f, 198.0f / 255.0f, 211.0f / 255.0f, 0.6f));
     chatScrollView->setContainerHeight(0.0f);
 
     chatScrollView->setOnTouchDownListener([chatScrollView](vec2<float> eventPosition) {
@@ -126,7 +126,7 @@ void onInit()
     ui::View* entryBar = new ui::View();
     entryBar->setPosition(vec2<float>(0.0f, height * 0.935f));
     entryBar->setSize(vec2<float>{width * 1.0f, height * 0.065f});
-    entryBar->setColor(vec4<float>(0.9f, 0.9f, 0.9f, 1.0f));
+    entryBar->setColor(vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
 
     
     ui::View* entryButtonSend = new ui::View();
