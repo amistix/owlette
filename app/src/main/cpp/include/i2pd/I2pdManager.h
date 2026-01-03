@@ -2,6 +2,7 @@
 #include <chrono>
 #include <string>
 #include <memory>
+#include <vector>
 
 #include "storage/AppStorageManager.h"
 
@@ -15,7 +16,8 @@ namespace i2p
         void start();
         void restart();
         void shutdown();
-    
+
+
     private:
 
         void initialize();

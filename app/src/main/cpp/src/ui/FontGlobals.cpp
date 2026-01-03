@@ -1,3 +1,8 @@
 #include "ui/FontAtlas.h"
 
-std::vector<FontAtlas> g_fontAtlases;
+FontAtlas* globalAtlas = nullptr;
+FontAtlas* largeAtlas = nullptr;
+FontAtlas* bigAtlas = nullptr;
+FontAtlas* mediumAtlas = nullptr;
+FontAtlas* littleAtlas = nullptr;
+FontAtlas* tinyAtlas = nullptr;

@@ -7,10 +7,13 @@ namespace ui
     TextView::~TextView() {}
 
     void TextView::setText(const std::string& text) {_text = text;}
-
+    std::string TextView::getText() {return _text;}
+    
     void TextView::setColorText(vec4<float> color) {_text_color = color;}
-
+    
     void TextView::setFontAtlas(FontAtlas* atlas) {_atlas = atlas;}
+    FontAtlas* TextView::getFontAtlas() {return _atlas;}
+
 
     void TextView::drawSelf() 
     {

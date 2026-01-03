@@ -6,11 +6,12 @@ namespace animation
     std::vector<Animator::Animation> Animator::_animations;
     float Animator::_currentTime = 0.0f;
 
+
     void Animator::animatePosition(ui::View* view, 
-                vec2<float> startPos, 
-                vec2<float> endPos,
-                std::function<float(float)> timingCurveFunc,
-                float duration)
+        vec2<float> startPos, 
+        vec2<float> endPos,
+        std::function<float(float)> timingCurveFunc,
+        float duration)
     {
 
         //f(0) = 0, f(1) = 1
@@ -33,10 +34,10 @@ namespace animation
     }
 
     void Animator::animateSize(ui::View* view, 
-                vec2<float> startSize, 
-                vec2<float> endSize,
-                std::function<float(float)> timingCurveFunc,
-                float duration)
+        vec2<float> startSize, 
+        vec2<float> endSize,
+        std::function<float(float)> timingCurveFunc,
+        float duration)
     {
 
         //f(0) = 0, f(1) = 1
@@ -59,10 +60,10 @@ namespace animation
     }
 
     void Animator::animateColor(ui::View* view, 
-                vec4<float> startColor, 
-                vec4<float> endColor,
-                std::function<float(float)> timingCurveFunc,
-                float duration)
+        vec4<float> startColor, 
+        vec4<float> endColor,
+        std::function<float(float)> timingCurveFunc,
+        float duration)
     {
 
         //f(0) = 0, f(1) = 1

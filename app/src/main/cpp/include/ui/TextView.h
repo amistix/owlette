@@ -13,8 +13,12 @@ namespace ui
         ~TextView ();
 
         void setText(const std::string& text);
+        std::string getText();
+
         void setColorText(vec4<float> color);
+
         void setFontAtlas(FontAtlas* atlas);
+        FontAtlas* getFontAtlas();
 
         virtual void drawSelf() override;
 
