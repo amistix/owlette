@@ -6,19 +6,119 @@
 #include <android/log.h>
 #include <memory>
 #include <string>
+#include <thread>
+#include <atomic>
 
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "DestinationClient", __VA_ARGS__))
-#define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "DestinationClient", __VA_ARGS__))
+#include "ui/View.h"
+#include "ui/TextView.h"
+#include "extra/vec4.h"
+
+#include "storage/AppStorageManager.h"
+
+// ✅ Store active stream globally for sending
+static std::shared_ptr<i2p::stream::Stream> g_activeStream;
+static std::string g_activePeerIdentity;
+
+// ✅ Logcat-only macros
+#define LOGI_LOGCAT(...) ((void)__android_log_print(ANDROID_LOG_INFO, "DestinationClient", __VA_ARGS__))
+#define LOGE_LOGCAT(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "DestinationClient", __VA_ARGS__))
 
 // Store the destination so it stays alive
 static std::shared_ptr<i2p::client::ClientDestination> g_localDest;
+
+extern ui::View* rootView;
+extern void attachMessage(const std::string& authorName, const std::string& text, bool ownMessage);
+
+bool connectToDestination(const std::string& remoteDestBase64);
+
+// ✅ Combined logging functions - log to both logcat AND UI
+void LOGI(const std::string& content)
+{
+    LOGI_LOGCAT("%s", content.c_str());
+    
+    if (!rootView) return;
+    
+    auto& children = rootView->getChildren();
+    if (children.empty()) return;
+    
+    auto& topBarChildren = children[0]->getChildren();
+    if (topBarChildren.empty()) return;
+    
+    ui::TextView* topBarText = static_cast<ui::TextView*>(topBarChildren[0]);
+    if (!topBarText) return;
+    
+    topBarText->setText(content);
+}
+
+void LOGE(const std::string& content)
+{
+    LOGE_LOGCAT("%s", content.c_str());
+    
+    if (!rootView) return;
+    
+    auto& children = rootView->getChildren();
+    if (children.empty()) return;
+    
+    auto& topBarChildren = children[0]->getChildren();
+    if (topBarChildren.empty()) return;
+    
+    ui::TextView* topBarText = static_cast<ui::TextView*>(topBarChildren[0]);
+    if (!topBarText) return;
+    
+    topBarText->setText("ERROR: " + content);
+    // topBarText->setColorText(vec4<float>(1.0f, 0.0f, 0.0f, 1.0f));
+}
+
+// ✅ Bidirectional stream handler - no timeouts, continuous receive
+void handleStream(std::shared_ptr<i2p::stream::Stream> stream, 
+                  std::shared_ptr<i2p::client::ClientDestination> localDest,
+                  const std::string& peerIdentity) {
+    
+    try {
+        LOGI_LOGCAT("Stream handler started for peer: %s", peerIdentity.substr(0, 20).c_str());
+        g_activeStream = stream;
+        
+        while (true) {
+            uint8_t buf[8192];
+            
+            // ✅ 30 second timeout - waits up to 30s for data
+            size_t len = stream->Receive(buf, sizeof(buf), 30);
+            
+            if (len > 0) {
+                std::string message(reinterpret_cast<char*>(buf), len);
+                LOGI_LOGCAT("Received %zu bytes: %s", len, message.c_str());
+                
+                // Add to chat UI
+                attachMessage(peerIdentity.substr(0, 20), message, false);
+                
+            } else {
+                // Check if stream is still connected
+                // i2p streams don't have a simple "isConnected" check,
+                // but we can try to send a 0-byte packet
+                try {
+                    // Just continue - timeout doesn't mean disconnected
+                    LOGI_LOGCAT("No data received, waiting...");
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                } catch (...) {
+                    LOGI("Stream closed");
+                    break;
+                }
+            }
+        }
+        
+        LOGI_LOGCAT("Stream handler finished");
+        
+    } catch (const std::exception& e) {
+        LOGE_LOGCAT("Stream handler error: %s", e.what());
+    }
+}
 
 std::string startDestinationClient() {
     try {
         LOGI("Creating PUBLIC destination...");
         
         auto localDest = i2p::client::context.CreateNewLocalDestination(
-            true,  // PUBLIC
+            true,
             i2p::data::SIGNING_KEY_TYPE_EDDSA_SHA512_ED25519,
             i2p::data::CRYPTO_KEY_TYPE_ECIES_X25519_AEAD
         );
@@ -31,112 +131,101 @@ std::string startDestinationClient() {
         std::string identity = localDest->GetIdentity()->ToBase64();
         std::string base32 = localDest->GetIdentHash().ToBase32() + ".b32.i2p";
         
-        LOGI("Created destination (base32): %s", base32.c_str());
-        LOGI("Created destination (base64): %s", identity.substr(0, 50).c_str());
-        LOGI("Full length: %zu characters", identity.length());
-        LOGI("Full base64: %s", identity.c_str());
+        LOGI("Created destination");
+        LOGI_LOGCAT("Base32: %s", base32.c_str());
+        LOGI_LOGCAT("Base64: %s", identity.substr(0, 50).c_str());
+        LOGI_LOGCAT("Full base64: %s", identity.c_str());
         
-        // IMPORTANT: Run each connection in its own thread!
+        // ✅ Accept incoming connections with bidirectional handler
         localDest->AcceptStreams([localDest](std::shared_ptr<i2p::stream::Stream> stream) {
             LOGI("Incoming connection!");
             
-            // Handle in separate thread to avoid blocking
-            std::thread([stream, localDest]() {
-                try {
-                    LOGI("Connection handler thread started");
-                    
-                    uint8_t buf[8192];
-                    size_t len = stream->Receive(buf, sizeof(buf), 30);
-                    
-                    if (len > 0) {
-                        std::string message(reinterpret_cast<char*>(buf), len);
-                        LOGI("Received %zu bytes", len);
-                        LOGI("Data: %s", message.substr(0, 200).c_str());
-                        
-                        // Build HTTP response if it looks like HTTP
-                        if (message.find("GET") == 0 || message.find("POST") == 0) {
-                            LOGI("Detected HTTP request");
-                            
-                            std::ostringstream response;
-                            response << "HTTP/1.1 200 OK\r\n";
-                            response << "Content-Type: text/html\r\n";
-                            response << "Connection: close\r\n";
-                            response << "\r\n";
-                            response << "<!DOCTYPE html>\n";
-                            response << "<html>\n";
-                            response << "<head><title>Android i2pd</title></head>\n";
-                            response << "<body>\n";
-                            response << "<h1>Success! Connected to Android</h1>\n";
-                            response << "<p>Your PC successfully reached this Android device via i2p!</p>\n";
-                            response << "</body>\n";
-                            response << "</html>\n";
-                            
-                            std::string responseStr = response.str();
-                            stream->Send(
-                                reinterpret_cast<const uint8_t*>(responseStr.c_str()),
-                                responseStr.length()
-                            );
-                            
-                            LOGI("Sent HTTP response");
-                        } else {
-                            // Echo back for non-HTTP
-                            stream->Send(buf, len);
-                            LOGI("Echoed back %zu bytes", len);
-                        }
-                    } else {
-                        LOGI("Connection closed (no data)");
-                    }
-                    
-                    LOGI("Connection handler finished");
-                    
-                } catch (const std::exception& e) {
-                    LOGE("Error in handler: %s", e.what());
-                }
-            }).detach(); // Detach so thread runs independently
+            auto remoteIdentity = stream->GetRemoteIdentity();
+            std::string peerDest = remoteIdentity ? remoteIdentity->ToBase64() : "Unknown";
+            std::string peerBase32 = remoteIdentity ? 
+                (remoteIdentity->GetIdentHash().ToBase32() + ".b32.i2p") : "Unknown";
             
+            LOGI_LOGCAT("Peer: %s", peerBase32.c_str());
+            
+            // ✅ Save peer for reconnection
+            // if (remoteIdentity) {
+            //     storage::writePeer(peerDest);
+            // }
+            
+            // ✅ Handle stream in separate thread with continuous receive
+            std::thread([stream, localDest, peerDest]() {
+                handleStream(stream, localDest, peerDest);
+            }).detach();
         });
         
-        LOGI("AcceptStreams set up successfully");
+        LOGI("Listener started");
         
         g_localDest = localDest;
+        
+        LOGI("Waiting for tunnels...");
+        int attempts = 0;
+        std::string spinningSymbol = "/-\\|";
+        
+        while (!g_localDest->IsReady() && attempts < 60) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            attempts++;
+            LOGI(std::string(1, spinningSymbol[attempts % 4]) + " Waiting... " + std::to_string(attempts) + "s");
+        }
+        
+        if (!g_localDest->IsReady()) {
+            LOGE("Tunnels not ready after 60s!");
+            return "";
+        }
+        
+        LOGI("Tunnels ready!");
+
+        storage::writeDest(identity);
+        LOGI_LOGCAT("Destination saved to storage");
+        
+        // ✅ Auto-connect to last peer
+        std::string lastPeer = storage::readPeer();
+        if (!lastPeer.empty() && lastPeer != identity) {
+            LOGI("Auto-connecting to last peer...");
+            std::thread([lastPeer]() {
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                connectToDestination(lastPeer);
+            }).detach();
+        }
+        else storage::writePeer("");
+        
         return identity;
         
     } catch (const std::exception& e) {
-        LOGE("Exception: %s", e.what());
+        LOGE(std::string("Exception: ") + e.what());
         return "";
     }
 }
 
-// Function to connect to another destination
+
+// ✅ Connect and keep stream alive for bidirectional communication
 bool connectToDestination(const std::string& remoteDestBase64) {
     try {
         if (!g_localDest) {
-            LOGE("Local destination not created yet!");
+            LOGE("Local destination not created!");
             return false;
         }
 
-        LOGI("Waiting for tunnels to be ready...");
-        int attempts = 0;
-        while (!g_localDest->IsReady() && attempts < 60) {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            attempts++;
-            if (attempts % 5 == 0) {
-                LOGI("Still waiting for tunnels... (%d/60)", attempts);
-            }
+        if (!g_localDest->IsReady()) {
+            LOGE("Tunnels not ready!");
+            return false;
         }
         
-        LOGI("Connecting to: %s", remoteDestBase64.substr(0, 50).c_str());
+        LOGI("Connecting...");
+        LOGI_LOGCAT("Target: %s", remoteDestBase64.substr(0, 50).c_str());
         
-        // Parse remote destination
         i2p::data::IdentityEx remoteIdentity;
         if (!remoteIdentity.FromBase64(remoteDestBase64)) {
             LOGE("Invalid destination format!");
             return false;
         }
         
-        LOGI("Remote identity parsed successfully");
+        LOGI_LOGCAT("Remote identity parsed");
         
-        // Create stream
         LOGI("Creating stream...");
         auto stream = g_localDest->CreateStream(remoteIdentity.GetIdentHash());
         
@@ -145,39 +234,66 @@ bool connectToDestination(const std::string& remoteDestBase64) {
             return false;
         }
         
-        LOGI("Stream created successfully!");
+        LOGI("Stream created!");
         
-        // Send test message
-        std::string testMsg = "Hello from startDestinationClient!";
-        stream->Send(
-            reinterpret_cast<const uint8_t*>(testMsg.c_str()),
-            testMsg.length()
-        );
+        // ✅ Store stream globally for sending messages
+        g_activeStream = stream;
+        g_activePeerIdentity = remoteDestBase64;
         
-        LOGI("Sent test message: %s", testMsg.c_str());
+        // ✅ Save peer
+        // storage::writePeer(remoteDestBase64);
         
-        // Wait for response
-        uint8_t buf[1024];
-        size_t len = stream->Receive(buf, sizeof(buf), 30);
+        // ✅ Start bidirectional handler in background
+        std::thread([stream, remoteDestBase64]() {
+            handleStream(stream, g_localDest, remoteDestBase64);
+        }).detach();
         
-        if (len > 0) {
-            std::string response(reinterpret_cast<char*>(buf), len);
-            LOGI("Received response (%zu bytes): %s", len, response.c_str());
-        }
+        LOGI("Connected! Chat active.");
         
         return true;
         
     } catch (const std::exception& e) {
-        LOGE("Exception in connectToDestination: %s", e.what());
+        LOGE(std::string("Connect error: ") + e.what());
         return false;
     }
 }
 
-// Cleanup
+// ✅ Send message through active stream
+bool sendMessage(const std::string& message) {
+    if (!g_activeStream) {
+        LOGE("No active connection!");
+        return false;
+    }
+    
+    try {
+        g_activeStream->Send(
+            reinterpret_cast<const uint8_t*>(message.c_str()),
+            message.length()
+        );
+        
+        LOGI_LOGCAT("Sent: %s", message.c_str());
+        
+        // ✅ Add to UI as own message
+        attachMessage("You", message, true);
+        
+        return true;
+    } catch (const std::exception& e) {
+        LOGE(std::string("Send error: ") + e.what());
+        return false;
+    }
+}
+
 void stopDestinationClient() {
-    LOGI("Stopping destination client...");
+    LOGI("Stopping client...");
+    
+    if (g_activeStream) {
+        g_activeStream.reset();
+        g_activeStream = nullptr;
+    }
+    
     if (g_localDest) {
         g_localDest.reset();
     }
-    LOGI("Destination client stopped");
+    
+    LOGI_LOGCAT("Destination client stopped");
 }

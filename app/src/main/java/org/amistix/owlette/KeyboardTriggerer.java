@@ -42,9 +42,11 @@ public class KeyboardTriggerer extends EditText {
         });
     }
 
-    public void clearText()
-    {
-        setText("");
+    public void clearText() {
+        this.post(() -> {
+            setText("");
+            setSelection(0);
+        });
     }
 
     public void showKeyboard(String initialText) {

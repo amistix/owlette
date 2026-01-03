@@ -10,6 +10,8 @@ extern FontAtlas* mediumAtlas;
 extern FontAtlas* littleAtlas;
 extern FontAtlas* tinyAtlas;
 
+extern bool sendMessage(const std::string& message);
+
 
 ui::View* getRootView() { return rootView; }
 void attachMessage(const std::string& authorName, const std::string& text, bool ownMessage);
@@ -53,14 +55,54 @@ void onInit()
     topBar->setColor(vec4<float>(224.0f/255.0f, 25.0f/255.0f, 78.0f/255.0f, 1.0f));
     
     ui::TextView* title = new ui::TextView();
-    title->setPosition(vec2<float>(height * 0.02f, height * 0.005f));
     title->setColor(vec4<float>(1.0f, 1.0f, 1.0f, 0.0f));
     title->setColorText(vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
-    title->setSize(vec2<float>(width * 0.7f, height * 0.05f));
     title->setText("Loading...");
     title->setFontAtlas(bigAtlas);
+    
+    TextMetrics metricsTitle = measureTextWrapped(
+        title->getText(),
+        width,  
+        *(title->getFontAtlas())
+    );
+    
+    title->setPosition(vec2<float>((height * 0.065f - metricsTitle.height) / 2, (height * 0.065f - metricsTitle.height) / 2));
+    title->setSize(vec2<float>(width * 1.0f - height * 0.065f - (height * 0.065f - metricsTitle.height), metricsTitle.height));
 
+    ui::View* titleButtonMore = new ui::View();
+    titleButtonMore->setPosition(vec2<float>(width - height * 0.065f, 0.0f));
+    titleButtonMore->setSize(vec2<float>{height * 0.065f, height * 0.065f});
+    titleButtonMore->setColor(vec4<float>(224.0f/255.0f, 25.0f/255.0f, 78.0f/255.0f, 1.0f));
+    
+    ui::TextView* titleButtonMoreIcon = new ui::TextView();
+    titleButtonMoreIcon->setHittable(false);
+    titleButtonMoreIcon->setText("+");
+    titleButtonMoreIcon->setFontAtlas(bigAtlas);
+    titleButtonMoreIcon->setColorText(vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
+    titleButtonMoreIcon->setColor(vec4<float>(0.0f, 0.0f, 0.0f, 0.0f));
+    
+    TextMetrics metricsTitleIcon = measureTextWrapped(
+        titleButtonMoreIcon->getText(),
+        width,  
+        *(titleButtonMoreIcon->getFontAtlas())
+    );
+    
+    titleButtonMoreIcon->setSize(vec2<float>(metricsTitleIcon.width, metricsTitleIcon.height));
+    titleButtonMoreIcon->setPosition(vec2<float>((height * 0.065f - metricsTitleIcon.width) / 2, (height * 0.065f - metricsTitleIcon.height) / 2));
+    
+    titleButtonMore->setOnTouchDownListener([titleButtonMore](vec2<float> eventPosition)
+    {
+        titleButtonMore->setColor(vec4<float>(199.0f/255.0f, 0.0f/255.0f, 53.0f/255.0f, 1.0f));
+    });
+    
+    titleButtonMore->setOnTouchUpListener([titleButtonMore](vec2<float> eventPosition)
+    {
+        titleButtonMore->setColor(vec4<float>(224.0f/255.0f, 25.0f/255.0f, 78.0f/255.0f, 1.0f));
+    });
+
+    titleButtonMore->addChild(titleButtonMoreIcon);
     topBar->addChild(title);
+    topBar->addChild(titleButtonMore);
     rootView->addChild(topBar);
 
     ui::ScrollView* chatScrollView = new ui::ScrollView();
@@ -111,7 +153,7 @@ void onInit()
     ui::EditTextView* entry = new ui::EditTextView();
     entry->setColor(vec4<float>(1.0f, 1.0f, 1.0f, 0.0f));
     entry->setColorText(vec4<float>(0.0f, 0.0f, 0.0f, 1.0f));
-    entry->setSize(vec2<float>(width * 1.0f - 60.0f, height * 0.065f - 60.0f));
+    entry->setSize(vec2<float>(width * 1.0f - height * 0.065f, height * 0.065f - 60.0f));
     entry->clearText();
     entry->setHittable(false);
     entry->setFontAtlas(mediumAtlas);
@@ -136,10 +178,10 @@ void onInit()
     
     entryButtonSend->setOnTouchUpListener([entryButtonSend, entry](vec2<float> eventPosition)
     {
-        if(entry->getText().empty()) return;
-        attachMessage("You", entry->getText(), true);
-        entry->clearText();
         entryButtonSend->setColor(vec4<float>(224.0f/255.0f, 25.0f/255.0f, 78.0f/255.0f, 1.0f));
+        if(entry->getText().empty()) return;
+        sendMessage(entry->getText());
+        entry->clearText();
     });
     
     entryBar->addChild(entry);

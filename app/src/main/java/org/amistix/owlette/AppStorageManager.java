@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 
-import org.amistix.owlette.BuildConfig;
-
 import java.io.*;
 
 public class AppStorageManager {
@@ -31,10 +29,13 @@ public class AppStorageManager {
         new File(appStoragePath).mkdirs();
 
         // Copy assets if needed
-        processAssets(BuildConfig.VERSION_NAME);
+        // ✅ Use string literal instead of BuildConfig
+        processAssets("0.0.10");
 
         // Pass path to native C++
         setAppStoragePath(appStoragePath);
+        
+        Log.d(TAG, "AppStorageManager initialized: " + appStoragePath);
     }
 
     private void processAssets(String versionName) {
@@ -99,7 +100,12 @@ public class AppStorageManager {
     private void deleteRecursive(File file) {
         if (!file.exists()) return;
         if (file.isDirectory()) {
-            for (File child : file.listFiles()) deleteRecursive(child);
+            File[] children = file.listFiles();
+            if (children != null) {
+                for (File child : children) {
+                    deleteRecursive(child);
+                }
+            }
         }
         file.delete();
     }
@@ -126,6 +132,70 @@ public class AppStorageManager {
             }
         } catch (IOException e) {
             Log.e(TAG, "writeFile error: " + file, e);
+        }
+    }
+
+    public void writeFileConfig(String content) {
+        File file = new File(appStoragePath, "dest");
+        try {
+            File parent = file.getParentFile();
+            if (parent != null) parent.mkdirs();
+            try (FileWriter fw = new FileWriter(file)) {
+                fw.write(content);
+            }
+            Log.d(TAG, "Wrote config to: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            Log.e(TAG, "writeFile error: " + file, e);
+        }
+    }
+
+    public String readConfig() {
+        File file = new File(appStoragePath, "dest");
+        if (!file.exists()) {
+            Log.d(TAG, "Config file doesn't exist: " + file.getAbsolutePath());
+            return "";
+        }
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) sb.append(line);
+            Log.d(TAG, "Read config from: " + file.getAbsolutePath());
+            return sb.toString();
+        } catch (IOException e) {
+            Log.e(TAG, "readFile error: " + file, e);
+            return "";
+        }
+    }
+
+    public void writeFilePeer(String content) {
+        File file = new File(appStoragePath, "peer");
+        try {
+            File parent = file.getParentFile();
+            if (parent != null) parent.mkdirs();
+            try (FileWriter fw = new FileWriter(file)) {
+                fw.write(content);
+            }
+            Log.d(TAG, "Wrote config to: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            Log.e(TAG, "writePeer error: " + file, e);
+        }
+    }
+
+    public String readPeer() {
+        File file = new File(appStoragePath, "peer");
+        if (!file.exists()) {
+            Log.d(TAG, "Config file doesn't exist: " + file.getAbsolutePath());
+            return "";
+        }
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) sb.append(line);
+            Log.d(TAG, "Read config from: " + file.getAbsolutePath());
+            return sb.toString();
+        } catch (IOException e) {
+            Log.e(TAG, "readPeer error: " + file, e);
+            return "";
         }
     }
 }

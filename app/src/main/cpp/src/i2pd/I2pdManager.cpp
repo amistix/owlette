@@ -4,6 +4,8 @@
 
 namespace i2p
 {
+    // std::vector<std::shared_ptr<i2p::client::ClientDestination>> destinations = {}
+
     void I2pdManager::initialize()
     {
         if (daemon) return;
@@ -35,14 +37,14 @@ namespace i2p
     {
         if (daemonThread && daemonThread->joinable()) return;
         if (isRunning) return;
-        isRunning = true;
-
+        
         daemonThread = new std::thread([this]() {
             this->initialize();
             this->daemon->start();
             startDestinationClient();
-            // connectToDestination("");
+            //connectToDestination("");
         });
+        isRunning = true;
     }
 
     void I2pdManager::shutdown()
@@ -61,6 +63,7 @@ namespace i2p
             delete daemonThread;
             daemonThread = nullptr;
         }
+        isRunning = false;
     }
 
     void I2pdManager::restart()
