@@ -204,7 +204,7 @@ void attachMessage(const std::string& authorName, const std::string& text, bool 
     
 
     ui::View* messageBar = new ui::View();
-    messageBar->setColor(vec4<float>(0.9f, 0.9f, 0.9f, 1.0f));
+    messageBar->setColor(vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
     
 
     ui::TextView* authorNameView = new ui::TextView();

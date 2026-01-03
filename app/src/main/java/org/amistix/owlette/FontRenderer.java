@@ -12,7 +12,7 @@ public class FontRenderer {
 
     private static final String CHARSET =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" +
-        " .,!?;:'-_()[]{}@#$%^&*+=/<>\"\\|`~";
+        ".,!?;:'-_()[]{}@#$%^&*+=/<>\"\\|`~";
 
     public static JavaFontAtlas initFont(float textSize) {
         

@@ -260,23 +260,24 @@ bool connectToDestination(const std::string& remoteDestBase64) {
 
 // ✅ Send message through active stream
 bool sendMessage(const std::string& message) {
-    if (!g_activeStream) {
+    try {
+        attachMessage("You", message, true);
+        if (g_activeStream) 
+        {
+            
+            g_activeStream->Send(
+                reinterpret_cast<const uint8_t*>(message.c_str()),
+                message.length()
+            );
+            
+            LOGI_LOGCAT("Sent: %s", message.c_str());
+            return true;
+            
+        }   
         LOGE("No active connection!");
         return false;
-    }
-    
-    try {
-        g_activeStream->Send(
-            reinterpret_cast<const uint8_t*>(message.c_str()),
-            message.length()
-        );
+
         
-        LOGI_LOGCAT("Sent: %s", message.c_str());
-        
-        // ✅ Add to UI as own message
-        attachMessage("You", message, true);
-        
-        return true;
     } catch (const std::exception& e) {
         LOGE(std::string("Send error: ") + e.what());
         return false;
